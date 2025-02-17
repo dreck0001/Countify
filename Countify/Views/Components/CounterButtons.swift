@@ -17,8 +17,7 @@ struct DecrementButton: View {
             if session.allowNegatives || session.count > 0 {
                 isIncrementing = false
                 if session.hapticEnabled {
-                    let impact = UIImpactFeedbackGenerator(style: .medium)
-                    impact.impactOccurred()
+                    HapticManager.shared.playHaptic(style: .decrement)
                 }
                 session.count -= 1
                 onSave()
@@ -27,8 +26,11 @@ struct DecrementButton: View {
             Text("−")
                 .font(.system(size: 50, weight: .bold))
                 .foregroundColor(.red)
-                .frame(width: 40, height: 40)
+                .frame(width: 60, height: 60)
+                .contentShape(Rectangle())
         }
+        .accessibilityLabel("Decrease count")
+        .accessibilityHint("Double tap feedback will occur when pressed")
     }
 }
 
@@ -41,8 +43,7 @@ struct IncrementButton: View {
         Button(action: {
             isIncrementing = true
             if session.hapticEnabled {
-                let impact = UIImpactFeedbackGenerator(style: .medium)
-                impact.impactOccurred()
+                HapticManager.shared.playHaptic(style: .increment)
             }
             session.count += 1
             onSave()
@@ -50,8 +51,11 @@ struct IncrementButton: View {
             Text("+")
                 .font(.system(size: 50, weight: .bold))
                 .foregroundColor(.green)
-                .frame(width: 40, height: 40)
+                .frame(width: 60, height: 60)
+                .contentShape(Rectangle())
         }
+        .accessibilityLabel("Increase count")
+        .accessibilityHint("Single tap feedback will occur when pressed")
     }
 }
 
