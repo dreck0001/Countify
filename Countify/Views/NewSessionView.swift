@@ -13,6 +13,11 @@ struct NewSessionView: View {
     @State private var sessionName = ""
     @State private var hapticEnabled = true
     @State private var allowNegatives = false
+    @State private var stepSize = 1
+    @State private var enableUpperLimit = false
+    @State private var enableLowerLimit = false
+    @State private var upperLimit = 100
+    @State private var lowerLimit = 0
     @State private var navigateToCounter = false
     @State private var newSession: CountSession?
     
@@ -23,9 +28,22 @@ struct NewSessionView: View {
                     TextField("Name", text: $sessionName)
                 }
                 
-                Section(header: Text("Session Settings")) {
-                    Toggle("Vibration", isOn: $hapticEnabled)
+                Section(header: Text("Counter Settings")) {
+                    Stepper("Step Size: \(stepSize)", value: $stepSize, in: 1...100)
                     Toggle("Allow Negative Numbers", isOn: $allowNegatives)
+                    Toggle("Vibration", isOn: $hapticEnabled)
+                }
+                
+                Section(header: Text("Limits")) {
+                    Toggle("Set Upper Limit", isOn: $enableUpperLimit)
+                    if enableUpperLimit {
+                        Stepper("Upper Limit: \(upperLimit)", value: $upperLimit)
+                    }
+                    
+                    Toggle("Set Lower Limit", isOn: $enableLowerLimit)
+                    if enableLowerLimit {
+                        Stepper("Lower Limit: \(lowerLimit)", value: $lowerLimit)
+                    }
                 }
             }
             .navigationTitle("New Count Session")
@@ -37,8 +55,12 @@ struct NewSessionView: View {
                     let session = CountSession(
                         name: sessionName.isEmpty ? "New Count" : sessionName,
                         hapticEnabled: hapticEnabled,
-                        allowNegatives: allowNegatives
+                        allowNegatives: allowNegatives,
+                        stepSize: max(1, stepSize),  // Ensure step size is at least 1
+                        upperLimit: enableUpperLimit ? upperLimit : nil,
+                        lowerLimit: enableLowerLimit ? lowerLimit : nil
                     )
+                    print("Created session with: stepSize=\(session.stepSize), limits=\(String(describing: session.upperLimit)),\(String(describing: session.lowerLimit))")
                     sessionManager.saveSession(session)
                     newSession = session
                     navigateToCounter = true
@@ -58,6 +80,9 @@ struct NewSessionView: View {
     }
 }
 
-//#Preview {
-//    NewSessionView()
-//}
+#Preview {
+    NewSessionView(
+        sessionManager: CountSessionManager(),
+        isPresented: .constant(true)
+    )
+}

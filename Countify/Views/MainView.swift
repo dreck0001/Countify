@@ -14,7 +14,7 @@ struct ContentView: View {
         TabView {
             CountSessionListView(sessionManager: sessionManager)
                 .tabItem {
-                    Label("Countify", systemImage: "number.circle.fill")
+                    Label("Countify", systemImage: "minus.forwardslash.plus")
                 }
             
             SettingsView(sessionManager: sessionManager)
