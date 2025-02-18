@@ -2,6 +2,8 @@
 
 A sleek and simple counting app built with SwiftUI. Whether you're counting inventory, tracking repetitions, or keeping score, Countify provides an elegant solution with customizable sessions and persistent storage.
 
+![Countify Demo](Countify/Demo/Countify_demo_1.gif)
+
 ## Features
 
 - **Elegant Onboarding**:
