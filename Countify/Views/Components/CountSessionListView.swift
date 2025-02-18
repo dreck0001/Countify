@@ -13,13 +13,19 @@ struct CountSessionListView: View {
     
     var body: some View {
         NavigationView {
-            List {
-                ForEach(sessionManager.sessions.sorted(by: { $0.date > $1.date })) { session in
-                    NavigationLink(destination: CountingStepperView(session: session, sessionManager: sessionManager)) {
-                        SessionRowView(session: session)
+            Group {
+                if sessionManager.sessions.isEmpty {
+                    EmptyStateView(action: { showingNewSession = true })
+                } else {
+                    List {
+                        ForEach(sessionManager.sessions.sorted(by: { $0.date > $1.date })) { session in
+                            NavigationLink(destination: CountingStepperView(session: session, sessionManager: sessionManager)) {
+                                SessionRowView(session: session)
+                            }
+                        }
+                        .onDelete(perform: sessionManager.deleteSession)
                     }
                 }
-                .onDelete(perform: sessionManager.deleteSession)
             }
             .navigationTitle("Countify")
             .toolbar {
@@ -32,4 +38,8 @@ struct CountSessionListView: View {
             }
         }
     }
+}
+
+#Preview {
+    CountSessionListView(sessionManager: CountSessionManager())
 }

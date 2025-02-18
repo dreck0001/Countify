@@ -22,6 +22,13 @@ struct ContentView: View {
                     Label("Settings", systemImage: "gear")
                 }
         }
+        .onAppear {
+            // Make tab bar background transparent
+            let tabBarAppearance = UITabBarAppearance()
+            tabBarAppearance.configureWithTransparentBackground()
+            UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+            UITabBar.appearance().standardAppearance = tabBarAppearance
+        }
     }
 }
 
