@@ -4,6 +4,11 @@ A sleek and simple counting app built with SwiftUI. Whether you're counting inve
 
 ## Features
 
+- **Elegant Onboarding**:
+  - Welcoming empty state with comprehensive feature showcase
+  - Beautiful card-based layout highlighting key capabilities
+  - Seamless first-time user experience
+  - Clear call-to-action for getting started
 - **Session-Based Counting**: Create and manage multiple counting sessions
 - **Flexible Counting Options**:
   - Custom step sizes for increment/decrement
@@ -23,6 +28,7 @@ A sleek and simple counting app built with SwiftUI. Whether you're counting inve
   - Intuitive controls
   - Clean, modern design
   - Smart text scaling for large numbers
+  - Polished empty states with feature presentations
 - **Data Persistence**: All sessions are automatically saved
 - **Dark Mode Support**: Seamless integration with system appearance
 
@@ -62,6 +68,7 @@ Countify/
 │   ├── NewSessionView.swift
 │   ├── SettingsView.swift
 │   └── Components/
+│       ├── EmptyStateView.swift
 │       ├── SessionRowView.swift
 │       ├── CounterDisplayView.swift
 │       ├── CounterControlsView.swift
