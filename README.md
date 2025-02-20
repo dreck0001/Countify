@@ -21,16 +21,17 @@ A sleek and simple counting app built with SwiftUI. Whether you're counting inve
   - Negative numbers support
   - Step size (1-100)
   - Optional upper and lower limits
+- **Modern User Interface**:
+  - Interactive action sheets with gesture support
+  - Smooth animations and transitions
+  - Intuitive controls and feedback
+  - Clean, modern design with proper layering
+  - Smart text scaling for large numbers
+  - Polished empty states with feature presentations
 - **Accessibility**:
   - VoiceOver support
   - Distinct haptic patterns for different actions
   - Clear visual feedback for limits
-- **Elegant UI**:
-  - Smooth animations
-  - Intuitive controls
-  - Clean, modern design
-  - Smart text scaling for large numbers
-  - Polished empty states with feature presentations
 - **Data Persistence**: All sessions are automatically saved
 - **Dark Mode Support**: Seamless integration with system appearance
 
@@ -74,7 +75,8 @@ Countify/
 │       ├── SessionRowView.swift
 │       ├── CounterDisplayView.swift
 │       ├── CounterControlsView.swift
-│       └── CounterButtons.swift
+│       ├── CounterButtons.swift
+│       └── CounterActionSheet.swift
 └── Utilities/
     └── HapticManager.swift
 ```
