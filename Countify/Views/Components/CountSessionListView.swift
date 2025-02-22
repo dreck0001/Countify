@@ -17,6 +17,7 @@ struct CountSessionListView: View {
     @State private var showingNewSession = false
     @State private var newSessionName = ""
     
+    // Filter sessions based on search text
     var filteredSessions: [CountSession] {
         if searchText.isEmpty {
             return sessionManager.sessions.sorted(by: { $0.date > $1.date })
@@ -91,21 +92,23 @@ struct CountSessionListView: View {
                 }
                 
                 // Floating Action Button
-                VStack {
-                    Spacer()
-                    Button(action: { showingNewSession = true }) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.blue)
-                                .frame(width: 80, height: 80)
-                                .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
-                            
-                            Image(systemName: "plus")
-                                .font(.system(size: 24, weight: .semibold))
-                                .foregroundColor(.white)
-                        }
+                if !sessionManager.sessions.isEmpty {
+                    VStack {
+                        Spacer()
+                            Button(action: { showingNewSession = true }) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.blue)
+                                        .frame(width: 80, height: 80)
+                                        .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
+                        
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 24, weight: .semibold))
+                                        .foregroundColor(.white)
+                                }
+                            }
+                            .padding(.bottom, 20)
                     }
-                    .padding(.bottom, 22)
                 }
             }
             .navigationTitle("Countify")

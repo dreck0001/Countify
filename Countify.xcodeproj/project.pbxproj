@@ -29,20 +29,41 @@
 		92A0DEA42D62F1AA00329669 /* CountifyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CountifyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		92E0E1432D6A5A6B0041B0C0 /* Exceptions for "CountifyTests" folder in "CountifyTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				CountifyTests.swift,
+			);
+			target = 92A0DE992D62F1AA00329669 /* CountifyTests */;
+		};
+		92E0E1442D6A5A6B0041B0C0 /* Exceptions for "CountifyTests" folder in "CountifyUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				CountifyTests.swift,
+			);
+			target = 92A0DEA32D62F1AA00329669 /* CountifyUITests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		92A0DE8C2D62F1A900329669 /* Countify */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Countify;
 			sourceTree = "<group>";
 		};
-		92A0DE9D2D62F1AA00329669 /* CountifyTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = CountifyTests;
-			sourceTree = "<group>";
-		};
 		92A0DEA72D62F1AA00329669 /* CountifyUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = CountifyUITests;
+			sourceTree = "<group>";
+		};
+		92E0E1422D6A5A4A0041B0C0 /* CountifyTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				92E0E1432D6A5A6B0041B0C0 /* Exceptions for "CountifyTests" folder in "CountifyTests" target */,
+				92E0E1442D6A5A6B0041B0C0 /* Exceptions for "CountifyTests" folder in "CountifyUITests" target */,
+			);
+			path = CountifyTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -76,7 +97,7 @@
 			isa = PBXGroup;
 			children = (
 				92A0DE8C2D62F1A900329669 /* Countify */,
-				92A0DE9D2D62F1AA00329669 /* CountifyTests */,
+				92E0E1422D6A5A4A0041B0C0 /* CountifyTests */,
 				92A0DEA72D62F1AA00329669 /* CountifyUITests */,
 				92A0DE8B2D62F1A900329669 /* Products */,
 			);
@@ -130,9 +151,6 @@
 			dependencies = (
 				92A0DE9C2D62F1AA00329669 /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				92A0DE9D2D62F1AA00329669 /* CountifyTests */,
-			);
 			name = CountifyTests;
 			packageProductDependencies = (
 			);
@@ -155,6 +173,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				92A0DEA72D62F1AA00329669 /* CountifyUITests */,
+				92E0E1422D6A5A4A0041B0C0 /* CountifyTests */,
 			);
 			name = CountifyUITests;
 			packageProductDependencies = (
