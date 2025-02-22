@@ -67,7 +67,7 @@ struct CountSessionListView: View {
                                     ForEach(filteredSessions) { session in
                                         UpdatedLongPressableCard(
                                             session: session,
-                                            destination: EnhancedCountingStepperView(
+                                            destination: CountingSessionView(
                                                 session: session,
                                                 sessionManager: sessionManager
                                             ),
@@ -469,14 +469,14 @@ struct EnhancedCounterControlsView: View {
     var body: some View {
         ZStack {
             // Glassmorphism effect for controls background
-            RoundedRectangle(cornerRadius: 30)
-                .fill(Color.primary.opacity(0.05))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 30)
-                        .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
-                )
-                .frame(height: 130)
-                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
+//            RoundedRectangle(cornerRadius: 30)
+//                .fill(Color.primary.opacity(0.05))
+//                .overlay(
+//                    RoundedRectangle(cornerRadius: 30)
+//                        .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
+//                )
+//                .frame(height: 130)
+//                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
             
             HStack {
                 Spacer()
@@ -632,21 +632,21 @@ struct SearchBar: View {
 }
 
 // Icon-only feature indicator
-struct FeatureTag: View {
-    let icon: String
-    let text: String // Kept for reference but not displayed
-    
-    var body: some View {
-        Image(systemName: icon)
-            .font(.system(size: 14))
-            .padding(8)
-            .background(
-                Circle()
-                    .fill(Color.primary.opacity(0.08))
-            )
-            .foregroundColor(.primary.opacity(0.7))
-    }
-}
+//struct FeatureTag: View {
+//    let icon: String
+//    let text: String // Kept for reference but not displayed
+//
+//    var body: some View {
+//        Image(systemName: icon)
+//            .font(.system(size: 14))
+//            .padding(8)
+//            .background(
+//                Circle()
+//                    .fill(Color.primary.opacity(0.08))
+//            )
+//            .foregroundColor(.primary.opacity(0.7))
+//    }
+//}
 
 struct CardPressStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
@@ -717,7 +717,7 @@ struct CountSessionListViewWrapper: View {
                                     ForEach(filteredSessions) { session in
                                         UpdatedLongPressableCard(
                                             session: session,
-                                            destination: EnhancedCountingStepperView(
+                                            destination: CountingSessionView(
                                                 session: session,
                                                 sessionManager: sessionManager
                                             ),

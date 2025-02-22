@@ -2,7 +2,7 @@
 //  CounterDisplayView.swift
 //  Countify
 //
-//  Created by Throw Catchers on 2/16/25.
+//  Created by Throw Catchers on 2/20/25.
 //
 
 import SwiftUI
@@ -12,20 +12,14 @@ struct CounterDisplayView: View {
     let isIncrementing: Bool
     
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 60)
-                .fill(Color.gray.opacity(0.5))
-                .frame(height: 300)
-                .padding(.horizontal, 20)
-            
-            Text("\(count)")
-                .font(.system(size: 200, weight: .bold))
-                .minimumScaleFactor(0.3)
-                .lineLimit(1)
-                .padding(.horizontal, 40)
-                .contentTransition(.numericText(countsDown: !isIncrementing))
-                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: count)
-        }
+        Text("\(count)")
+            .contentTransition(.numericText(countsDown: isIncrementing))
+            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: count)
+            .minimumScaleFactor(0.3)
+            .lineLimit(1)
+            .font(.system(size: 200, weight: .bold))
+            .frame(height: UIScreen.main.bounds.height / 3)
+            .frame(width: UIScreen.main.bounds.width)
     }
 }
 
