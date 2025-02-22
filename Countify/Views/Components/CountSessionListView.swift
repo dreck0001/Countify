@@ -9,16 +9,14 @@ import SwiftUI
 
 struct CountSessionListView: View {
     @ObservedObject var sessionManager: CountSessionManager
-    @State private var showingNewSession = false
+    @Binding var showingActionSheet: Bool
+    @Binding var actionSheetSession: CountSession?
+    @Binding var showingRenameAlert: Bool
+    
     @State private var searchText = ""
-    @State private var selectedSession: CountSession? = nil
-    @State private var showingRenameAlert = false
-    @State private var showingActionSheet = false
+    @State private var showingNewSession = false
     @State private var newSessionName = ""
     
-    @Environment(\.colorScheme) private var colorScheme
-    
-    // Filter sessions based on search text
     var filteredSessions: [CountSession] {
         if searchText.isEmpty {
             return sessionManager.sessions.sorted(by: { $0.date > $1.date })
@@ -72,11 +70,13 @@ struct CountSessionListView: View {
                                                 sessionManager: sessionManager
                                             ),
                                             onLongPress: {
-                                                selectedSession = session
+                                                actionSheetSession = session
+                                                newSessionName = session.name
                                                 showingActionSheet = true
                                             },
                                             onEllipsisPress: {
-                                                selectedSession = session
+                                                actionSheetSession = session
+                                                newSessionName = session.name
                                                 showingActionSheet = true
                                             }
                                         )
@@ -90,34 +90,35 @@ struct CountSessionListView: View {
                     }
                 }
                 
-                // Place the ZStack for the action sheet in a higher-level ZStack
-                // When used in ContentView rather than here
-            }
-            .navigationTitle("Countify")
-            .toolbar {
-                Button(action: { showingNewSession = true }) {
-                    ZStack {
-                        Circle()
-                            .fill(Color.blue)
-                            .frame(width: 38, height: 38)
-                        
-                        Image(systemName: "plus")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.primary.opacity(0.9))
+                // Floating Action Button
+                VStack {
+                    Spacer()
+                    Button(action: { showingNewSession = true }) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.blue)
+                                .frame(width: 80, height: 80)
+                                .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
+                            
+                            Image(systemName: "plus")
+                                .font(.system(size: 24, weight: .semibold))
+                                .foregroundColor(.white)
+                        }
                     }
+                    .padding(.bottom, 22)
                 }
             }
+            .navigationTitle("Countify")
             .sheet(isPresented: $showingNewSession) {
                 NewSessionView(sessionManager: sessionManager, isPresented: $showingNewSession)
             }
             .onAppear {
-                // Initialize newSessionName whenever the view appears
-                if let session = selectedSession {
+                if let session = actionSheetSession {
                     newSessionName = session.name
                 }
             }
-            .onChange(of: showingActionSheet) { isShowing in
-                if isShowing, let session = selectedSession {
+            .onChange(of: showingRenameAlert) { isShowing in
+                if isShowing, let session = actionSheetSession {
                     newSessionName = session.name
                 }
             }
@@ -125,7 +126,7 @@ struct CountSessionListView: View {
                 TextField("Counter Name", text: $newSessionName)
                 
                 Button("Save") {
-                    if let session = selectedSession, !newSessionName.isEmpty {
+                    if let session = actionSheetSession, !newSessionName.isEmpty {
                         var updatedSession = session
                         updatedSession.name = newSessionName
                         sessionManager.saveSession(updatedSession)
@@ -133,8 +134,7 @@ struct CountSessionListView: View {
                 }
                 
                 Button("Cancel", role: .cancel) {
-                    // Reset name on cancel
-                    if let session = selectedSession {
+                    if let session = actionSheetSession {
                         newSessionName = session.name
                     }
                 }
@@ -146,10 +146,6 @@ struct CountSessionListView: View {
 }
 
 
-
-
-
-// Long-pressable card wrapper
 struct LongPressableCard<Destination: View>: View {
     let session: CountSession
     let destination: Destination
@@ -468,16 +464,6 @@ struct EnhancedCounterControlsView: View {
     
     var body: some View {
         ZStack {
-            // Glassmorphism effect for controls background
-//            RoundedRectangle(cornerRadius: 30)
-//                .fill(Color.primary.opacity(0.05))
-//                .overlay(
-//                    RoundedRectangle(cornerRadius: 30)
-//                        .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
-//                )
-//                .frame(height: 130)
-//                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
-            
             HStack {
                 Spacer()
                 
@@ -631,23 +617,6 @@ struct SearchBar: View {
     }
 }
 
-// Icon-only feature indicator
-//struct FeatureTag: View {
-//    let icon: String
-//    let text: String // Kept for reference but not displayed
-//
-//    var body: some View {
-//        Image(systemName: icon)
-//            .font(.system(size: 14))
-//            .padding(8)
-//            .background(
-//                Circle()
-//                    .fill(Color.primary.opacity(0.08))
-//            )
-//            .foregroundColor(.primary.opacity(0.7))
-//    }
-//}
-
 struct CardPressStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -657,147 +626,11 @@ struct CardPressStyle: ButtonStyle {
     }
 }
 
-// CountSessionListViewWrapper.swift - Fixed rename functionality
-struct CountSessionListViewWrapper: View {
-    @ObservedObject var sessionManager: CountSessionManager
-    @Binding var isShowingActionSheet: Bool
-    @Binding var actionSheetSession: CountSession?
-    @Binding var showingRenameAlert: Bool
-    
-    @State private var searchText = ""
-    @State private var showingNewSession = false
-    @State private var newSessionName = ""
-    
-    // Filter sessions based on search text
-    var filteredSessions: [CountSession] {
-        if searchText.isEmpty {
-            return sessionManager.sessions.sorted(by: { $0.date > $1.date })
-        } else {
-            return sessionManager.sessions
-                .filter { $0.name.lowercased().contains(searchText.lowercased()) }
-                .sorted(by: { $0.date > $1.date })
-        }
-    }
-    
-    var body: some View {
-        NavigationView {
-            ZStack {
-                // Empty state view when no sessions exist
-                if sessionManager.sessions.isEmpty {
-                    EmptyStateView(action: { showingNewSession = true })
-                } else {
-                    VStack(spacing: 0) {
-                        // Search bar
-                        SearchBar(text: $searchText)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 12)
-                        
-                        if filteredSessions.isEmpty {
-                            // No search results view
-                            VStack(spacing: 16) {
-                                Image(systemName: "magnifyingglass")
-                                    .font(.system(size: 48))
-                                    .foregroundColor(.secondary.opacity(0.6))
-                                    .padding(.top, 80)
-                                
-                                Text("No counters found")
-                                    .font(.title3)
-                                    .foregroundColor(.secondary)
-                                
-                                Text("Try a different search term")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary.opacity(0.8))
-                            }
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .background(Color.clear)
-                        } else {
-                            // List of count sessions
-                            ScrollView {
-                                VStack(spacing: 20) {
-                                    ForEach(filteredSessions) { session in
-                                        UpdatedLongPressableCard(
-                                            session: session,
-                                            destination: CountingSessionView(
-                                                session: session,
-                                                sessionManager: sessionManager
-                                            ),
-                                            onLongPress: {
-                                                // Show action sheet at ContentView level
-                                                actionSheetSession = session
-                                                newSessionName = session.name // Update name immediately
-                                                isShowingActionSheet = true
-                                            },
-                                            onEllipsisPress: {
-                                                // Show action sheet at ContentView level
-                                                actionSheetSession = session
-                                                newSessionName = session.name // Update name immediately
-                                                isShowingActionSheet = true
-                                            }
-                                        )
-                                    }
-                                }
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 12)
-                            }
-                            .background(Color.clear)
-                        }
-                    }
-                }
-            }
-            .navigationTitle("Countify")
-            .toolbar {
-                Button(action: { showingNewSession = true }) {
-                    ZStack {
-                        Circle()
-                            .fill(Color.blue)
-                            .frame(width: 38, height: 38)
-                        
-                        Image(systemName: "plus")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.primary.opacity(0.9))
-                    }
-                }
-            }
-            .sheet(isPresented: $showingNewSession) {
-                NewSessionView(sessionManager: sessionManager, isPresented: $showingNewSession)
-            }
-            // Use onAppear and monitor showingRenameAlert instead of onChange
-            .onAppear {
-                if let session = actionSheetSession {
-                    newSessionName = session.name
-                }
-            }
-            // Monitor rename alert visibility to set the initial name
-            .onChange(of: showingRenameAlert) { isShowing in
-                if isShowing, let session = actionSheetSession {
-                    newSessionName = session.name
-                }
-            }
-            .alert("Rename Counter", isPresented: $showingRenameAlert) {
-                TextField("Counter Name", text: $newSessionName)
-                
-                Button("Save") {
-                    if let session = actionSheetSession, !newSessionName.isEmpty {
-                        var updatedSession = session
-                        updatedSession.name = newSessionName
-                        sessionManager.saveSession(updatedSession)
-                    }
-                }
-                
-                Button("Cancel", role: .cancel) {
-                    // Reset name on cancel
-                    if let session = actionSheetSession {
-                        newSessionName = session.name
-                    }
-                }
-            } message: {
-                Text("Enter a new name for this counter")
-            }
-        }
-    }
-}
-
-
 #Preview {
-    CountSessionListView(sessionManager: CountSessionManager())
+    CountSessionListView(
+        sessionManager: CountSessionManager(),
+        showingActionSheet: .constant(false),
+        actionSheetSession: .constant(nil),
+        showingRenameAlert: .constant(false)
+    )
 }

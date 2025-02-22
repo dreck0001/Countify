@@ -10,27 +10,21 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var sessionManager = CountSessionManager()
     @State private var showingActionSheet = false
-    @State private var selectedSession: CountSession? = nil
-    @State private var showingRenameAlert = false
-    
-    // Create a shared state between ContentView and CountSessionListView
-    @State private var isShowingActionSheet = false
     @State private var actionSheetSession: CountSession? = nil
+    @State private var showingRenameAlert = false
     
     var body: some View {
         ZStack {
-            // Remove TabView and directly use CountSessionListViewWrapper
-            CountSessionListViewWrapper(
+            CountSessionListView(
                 sessionManager: sessionManager,
-                isShowingActionSheet: $isShowingActionSheet,
+                showingActionSheet: $showingActionSheet,
                 actionSheetSession: $actionSheetSession,
                 showingRenameAlert: $showingRenameAlert
             )
             
-            // Action sheet overlay on top of everything
-            if isShowingActionSheet, let session = actionSheetSession {
+            if showingActionSheet, let session = actionSheetSession {
                 CounterActionSheet(
-                    isPresented: $isShowingActionSheet,
+                    isPresented: $showingActionSheet,
                     session: session,
                     sessionManager: sessionManager,
                     showingRenameAlert: $showingRenameAlert
