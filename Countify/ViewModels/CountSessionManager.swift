@@ -9,13 +9,28 @@ import Foundation
 
 class CountSessionManager: ObservableObject {
     @Published var sessions: [CountSession] = []
-    @Published var hapticEnabled: Bool = true
-    @Published var allowNegatives: Bool = false
+    
+    // Default settings are still maintained but used only for new sessions
+    @Published var hapticEnabled: Bool = true {
+        didSet {
+            UserDefaults.standard.set(hapticEnabled, forKey: "DefaultHapticEnabled")
+        }
+    }
+    
+    @Published var allowNegatives: Bool = false {
+        didSet {
+            UserDefaults.standard.set(allowNegatives, forKey: "DefaultAllowNegatives")
+        }
+    }
     
     private let saveKey = "CountSessions"
     
     init() {
         loadSessions()
+        
+        // Load default settings
+        hapticEnabled = UserDefaults.standard.bool(forKey: "DefaultHapticEnabled")
+        allowNegatives = UserDefaults.standard.bool(forKey: "DefaultAllowNegatives")
     }
     
     func saveSession(_ session: CountSession) {

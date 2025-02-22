@@ -19,29 +19,13 @@ struct ContentView: View {
     
     var body: some View {
         ZStack {
-            TabView {
-                CountSessionListViewWrapper(
-                    sessionManager: sessionManager,
-                    isShowingActionSheet: $isShowingActionSheet,
-                    actionSheetSession: $actionSheetSession,
-                    showingRenameAlert: $showingRenameAlert
-                )
-                .tabItem {
-                    Label("Countify", systemImage: "minus.forwardslash.plus")
-                }
-                
-                SettingsView(sessionManager: sessionManager)
-                    .tabItem {
-                        Label("Settings", systemImage: "gear")
-                    }
-            }
-            .onAppear {
-                // Make tab bar background transparent
-                let tabBarAppearance = UITabBarAppearance()
-                tabBarAppearance.configureWithOpaqueBackground()
-                UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
-                UITabBar.appearance().standardAppearance = tabBarAppearance
-            }
+            // Remove TabView and directly use CountSessionListViewWrapper
+            CountSessionListViewWrapper(
+                sessionManager: sessionManager,
+                isShowingActionSheet: $isShowingActionSheet,
+                actionSheetSession: $actionSheetSession,
+                showingRenameAlert: $showingRenameAlert
+            )
             
             // Action sheet overlay on top of everything
             if isShowingActionSheet, let session = actionSheetSession {

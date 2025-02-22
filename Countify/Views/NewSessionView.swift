@@ -60,7 +60,6 @@ struct NewSessionView: View {
                         upperLimit: enableUpperLimit ? upperLimit : nil,
                         lowerLimit: enableLowerLimit ? lowerLimit : nil
                     )
-                    print("Created session with: stepSize=\(session.stepSize), limits=\(String(describing: session.upperLimit)),\(String(describing: session.lowerLimit))")
                     sessionManager.saveSession(session)
                     newSession = session
                     navigateToCounter = true
@@ -69,7 +68,7 @@ struct NewSessionView: View {
             .fullScreenCover(isPresented: $navigateToCounter) {
                 if let session = newSession {
                     NavigationView {
-                        CountingStepperView(session: session, sessionManager: sessionManager)
+                        CountingSessionView(session: session, sessionManager: sessionManager)
                             .navigationBarItems(trailing: Button("Done") {
                                 isPresented = false
                             })
