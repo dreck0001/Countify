@@ -22,7 +22,7 @@ struct NewSessionView: View {
     @State private var newSession: CountSession?
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 Section(header: Text("Session Name")) {
                     TextField("Name", text: $sessionName)
@@ -47,32 +47,38 @@ struct NewSessionView: View {
                 }
             }
             .navigationTitle("New Count Session")
-            .navigationBarItems(
-                leading: Button("Cancel") {
-                    isPresented = false
-                },
-                trailing: Button("Start") {
-                    let session = CountSession(
-                        name: sessionName.isEmpty ? "New Count" : sessionName,
-                        hapticEnabled: hapticEnabled,
-                        allowNegatives: allowNegatives,
-                        stepSize: max(1, stepSize),  // Ensure step size is at least 1
-                        upperLimit: enableUpperLimit ? upperLimit : nil,
-                        lowerLimit: enableLowerLimit ? lowerLimit : nil
-                    )
-                    sessionManager.saveSession(session)
-                    newSession = session
-                    navigateToCounter = true
-                }
-            )
-            .fullScreenCover(isPresented: $navigateToCounter) {
-                if let session = newSession {
-                    NavigationView {
-                        CountingSessionView(session: session, sessionManager: sessionManager)
-                            .navigationBarItems(trailing: Button("Done") {
-                                isPresented = false
-                            })
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Create") {
+                        let session = CountSession(
+                            name: sessionName.isEmpty ? "New Count" : sessionName,
+                            hapticEnabled: hapticEnabled,
+                            allowNegatives: allowNegatives,
+                            stepSize: max(1, stepSize),  // Ensure step size is at least 1
+                            upperLimit: enableUpperLimit ? upperLimit : nil,
+                            lowerLimit: enableLowerLimit ? lowerLimit : nil
+                        )
+                        sessionManager.saveSession(session)
+                        newSession = session
+                        navigateToCounter = true
                     }
+                }
+                
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        isPresented = false
+                    }
+                }
+            }
+            .navigationDestination(isPresented: $navigateToCounter) {
+                if let session = newSession {
+                    CountingSessionView(session: session, sessionManager: sessionManager)
+                        .onDisappear {
+                            // When returning from CountingSessionView, dismiss the NewSessionView
+                            if !navigateToCounter {
+                                isPresented = false
+                            }
+                        }
                 }
             }
         }
