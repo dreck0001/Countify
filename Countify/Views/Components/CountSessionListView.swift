@@ -64,7 +64,7 @@ struct CountSessionListView: View {
                             ScrollView {
                                 VStack(spacing: 20) {
                                     ForEach(filteredSessions) { session in
-                                        UpdatedLongPressableCard(
+                                        CountSessionCard(
                                             session: session,
                                             destination: CountingSessionView(
                                                 session: session,
