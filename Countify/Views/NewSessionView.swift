@@ -73,6 +73,7 @@ struct NewSessionView: View {
             .navigationDestination(isPresented: $navigateToCounter) {
                 if let session = newSession {
                     CountingSessionView(session: session, sessionManager: sessionManager)
+                        .navigationBarBackButtonHidden(true)
                         .onDisappear {
                             // When returning from CountingSessionView, dismiss the NewSessionView
                             if !navigateToCounter {
@@ -82,6 +83,7 @@ struct NewSessionView: View {
                 }
             }
         }
+        .interactiveDismissDisabled(navigateToCounter)
     }
 }
 

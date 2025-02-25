@@ -14,6 +14,7 @@ struct CountingSessionView: View {
     @State private var isIncrementing = true
     @Environment(\.dismiss) private var dismiss
     @State private var showingResetConfirmation = false
+    @State private var showingDeleteConfirmation = false
     
     // State for feature-specific sheets
     @State private var showingStepSizeSheet = false
@@ -164,17 +165,28 @@ struct CountingSessionView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.backward.circle")
-                        .font(.system(size: 24))
+                    Image(systemName: "chevron.backward")
+                        .font(.system(size: 20))
                         .foregroundColor(.primary)
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: {
-                    showingResetConfirmation = true
-                }) {
-                    Image(systemName: "arrow.counterclockwise")
-                        .font(.system(size: 18))
+                Menu {
+                    Button(action: {
+                        showingResetConfirmation = true
+                    }) {
+                        Label("Reset Counter", systemImage: "arrow.counterclockwise")
+                    }
+                    
+                    Button(role: .destructive, action: {
+                        showingDeleteConfirmation = true
+                    }) {
+                        Label("Delete Counter", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: 20))
+                        .foregroundColor(.primary)
                 }
             }
         }
@@ -193,6 +205,20 @@ struct CountingSessionView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Are you sure you want to reset the counter to \(resetValue)?")
+        }
+        .alert("Delete Counter", isPresented: $showingDeleteConfirmation) {
+            Button("Delete", role: .destructive) {
+                if let index = sessionManager.sessions.firstIndex(where: { $0.id == session.id }) {
+                    sessionManager.deleteSession(at: IndexSet(integer: index))
+                    if session.hapticEnabled {
+                        HapticManager.shared.playHaptic(style: .decrement)
+                    }
+                    dismiss()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Are you sure you want to delete this counter? This action cannot be undone.")
         }
         // Step Size Sheet
         .overlay {
@@ -236,6 +262,7 @@ struct CountingSessionView: View {
         }
     }
 }
+
 
 // Larger, interactive feature button
 struct FeatureButton: View {

@@ -92,7 +92,7 @@ struct LargeCountSessionCard: View {
             }
                 .frame(width: UIScreen.main.bounds.width * 1/7)
         }
-        .frame(height: 120) // Larger card height
+        .frame(height: 120)
         .frame(maxWidth: UIScreen.main.bounds.width)
         .background(cardBackground)
     }

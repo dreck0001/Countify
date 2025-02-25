@@ -7,20 +7,17 @@
 
 import SwiftUI
 
-// 1. First, let's create the bottom sheet UI
 struct CounterActionSheet: View {
     @Binding var isPresented: Bool
     let session: CountSession
     let sessionManager: CountSessionManager
     @Binding var showingRenameAlert: Bool
     
-    // To handle drag gesture for dismissing
     @GestureState private var dragOffset = CGSize.zero
     @State private var offset: CGFloat = 0
     
     var body: some View {
         ZStack {
-            // Semi-transparent background with easy tap-to-dismiss
             Color.black.opacity(0.4)
                 .ignoresSafeArea(edges: .all) // Ensure it covers everything
                 .onTapGesture {
@@ -90,14 +87,11 @@ struct CounterActionSheet: View {
                 }
                 .padding(.bottom, 16)
                 
-                // Menu items in a more compact layout
                 VStack(spacing: 0) {
                     CompactActionMenuItem(icon: "pencil", text: "Rename", action: {
-                        // First dismiss sheet, then show rename alert
                         withAnimation(.spring()) {
                             isPresented = false
                         }
-                        // Longer delay to ensure complete dismissal
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                             showingRenameAlert = true
                         }
@@ -108,7 +102,6 @@ struct CounterActionSheet: View {
                         dismiss()
                     })
                     
-                    // Delete action (destructive) - integrated into main menu
                     CompactActionMenuItem(icon: "trash", text: "Delete", action: {
                         deleteCounter()
                         dismiss()
@@ -119,7 +112,7 @@ struct CounterActionSheet: View {
             .padding(.horizontal, 16)
             .background(
                 RoundedRectangle(cornerRadius: 24)
-                    .fill(Color(.systemGray6)) // Light gray slick background
+                    .fill(Color(.systemGray6))
             )
             .offset(y: max(0, dragOffset.height) + offset)
             .gesture(
@@ -130,8 +123,7 @@ struct CounterActionSheet: View {
                         }
                     }
                     .onEnded { value in
-                        if value.translation.height > 50 { // Reduced threshold for dismissal
-                            // Dismiss if dragged down even a little
+                        if value.translation.height > 50 {
                             dismiss()
                         } else {
                             // Spring back
@@ -144,10 +136,9 @@ struct CounterActionSheet: View {
             .frame(maxWidth: .infinity)
             .frame(maxHeight: .infinity, alignment: .bottom)
             .transition(.move(edge: .bottom))
-            // Add padding to lift it slightly from the very bottom edge
             .padding(.bottom, 10)
         }
-        .ignoresSafeArea(edges: .all) // Make sure it covers everything including tab bars
+        .ignoresSafeArea(edges: .all)
     }
     
     // Helper functions
@@ -199,7 +190,6 @@ struct CounterActionSheet: View {
     }
 }
 
-// 2. Action menu item component
 struct ActionMenuItem: View {
     let icon: String
     let text: String
@@ -225,7 +215,7 @@ struct ActionMenuItem: View {
         }
     }
 }
-// 3. Scale button style for the quick actions
+
 struct ScaleButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label

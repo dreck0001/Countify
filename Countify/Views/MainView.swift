@@ -12,6 +12,7 @@ struct ContentView: View {
     @State private var showingActionSheet = false
     @State private var actionSheetSession: CountSession? = nil
     @State private var showingRenameAlert = false
+    @State private var showingNewSession = false
     
     var body: some View {
         ZStack {
@@ -19,7 +20,8 @@ struct ContentView: View {
                 sessionManager: sessionManager,
                 showingActionSheet: $showingActionSheet,
                 actionSheetSession: $actionSheetSession,
-                showingRenameAlert: $showingRenameAlert
+                showingRenameAlert: $showingRenameAlert,
+                showingNewSession: $showingNewSession
             )
             
             if showingActionSheet, let session = actionSheetSession {
@@ -30,6 +32,12 @@ struct ContentView: View {
                     showingRenameAlert: $showingRenameAlert
                 )
             }
+        }
+        .fullScreenCover(isPresented: $showingNewSession) {
+            NewSessionView(
+                sessionManager: sessionManager,
+                isPresented: $showingNewSession
+            )
         }
     }
 }

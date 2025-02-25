@@ -12,10 +12,9 @@ struct CountSessionListView: View {
     @Binding var showingActionSheet: Bool
     @Binding var actionSheetSession: CountSession?
     @Binding var showingRenameAlert: Bool
+    @Binding var showingNewSession: Bool
     
     @State private var searchText = ""
-    @State private var showingNewSession = false
-    @State private var newSessionName = ""
     
     // Filter sessions based on search text
     var filteredSessions: [CountSession] {
@@ -72,12 +71,10 @@ struct CountSessionListView: View {
                                             ),
                                             onLongPress: {
                                                 actionSheetSession = session
-                                                newSessionName = session.name
                                                 showingActionSheet = true
                                             },
                                             onEllipsisPress: {
                                                 actionSheetSession = session
-                                                newSessionName = session.name
                                                 showingActionSheet = true
                                             }
                                         )
@@ -112,42 +109,39 @@ struct CountSessionListView: View {
                 }
             }
             .navigationTitle("Countify")
-            .sheet(isPresented: $showingNewSession) {
-                NewSessionView(sessionManager: sessionManager, isPresented: $showingNewSession)
-            }
             .onAppear {
                 if let session = actionSheetSession {
-                    newSessionName = session.name
+                    showingRenameAlert = false
                 }
             }
             .onChange(of: showingRenameAlert) { isShowing in
                 if isShowing, let session = actionSheetSession {
-                    newSessionName = session.name
+                    // This handles the rename action from the action sheet
                 }
             }
             .alert("Rename Counter", isPresented: $showingRenameAlert) {
-                TextField("Counter Name", text: $newSessionName)
+                TextField("Counter Name", text: Binding(
+                    get: { actionSheetSession?.name ?? "" },
+                    set: { newName in
+                        if let session = actionSheetSession, !newName.isEmpty {
+                            var updatedSession = session
+                            updatedSession.name = newName
+                            sessionManager.saveSession(updatedSession)
+                        }
+                    }
+                ))
                 
                 Button("Save") {
-                    if let session = actionSheetSession, !newSessionName.isEmpty {
-                        var updatedSession = session
-                        updatedSession.name = newSessionName
-                        sessionManager.saveSession(updatedSession)
-                    }
+                    // The binding above handles the save action
                 }
                 
-                Button("Cancel", role: .cancel) {
-                    if let session = actionSheetSession {
-                        newSessionName = session.name
-                    }
-                }
+                Button("Cancel", role: .cancel) {}
             } message: {
                 Text("Enter a new name for this counter")
             }
         }
     }
 }
-
 
 struct LongPressableCard<Destination: View>: View {
     let session: CountSession
@@ -634,6 +628,7 @@ struct CardPressStyle: ButtonStyle {
         sessionManager: CountSessionManager(),
         showingActionSheet: .constant(false),
         actionSheetSession: .constant(nil),
-        showingRenameAlert: .constant(false)
+        showingRenameAlert: .constant(false),
+        showingNewSession: .constant(false)
     )
 }
