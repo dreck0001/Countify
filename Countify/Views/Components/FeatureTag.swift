@@ -32,7 +32,7 @@ struct FeatureTag: View {
     }
 }
 
-#Preview {
+#Preview(traits: .sizeThatFitsLayout) {
     HStack {
         FeatureTag(icon: "arrow.up.arrow.down", text: "5")
         FeatureTag(icon: "waveform", text: "")
@@ -40,5 +40,4 @@ struct FeatureTag: View {
         FeatureTag(icon: "ruler", text: "")
     }
     .padding()
-    .previewLayout(.sizeThatFits)
 }

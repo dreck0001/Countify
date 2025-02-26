@@ -110,12 +110,12 @@ struct CountSessionListView: View {
             }
             .navigationTitle("Countify")
             .onAppear {
-                if let session = actionSheetSession {
+                if actionSheetSession != nil {
                     showingRenameAlert = false
                 }
             }
-            .onChange(of: showingRenameAlert) { isShowing in
-                if isShowing, let session = actionSheetSession {
+            .onChange(of: showingRenameAlert) { oldValue, newValue in
+                if newValue && actionSheetSession != nil {
                     // This handles the rename action from the action sheet
                 }
             }
@@ -264,7 +264,7 @@ struct LargeCountCard: View {
                 .foregroundColor(.secondary.opacity(0.8))
                 .padding(.trailing, 16)
         }
-        .frame(height: 120) // Larger card height
+        .frame(height: 120)
         .frame(maxWidth: .infinity)
         .background(cardBackground)
     }
@@ -423,7 +423,7 @@ struct CounterFeatureCard: View {
     }
 }
 
-// Enhanced counter display with transparency and style
+//counter display with transparency and style
 struct EnhancedCounterDisplayView: View {
     let count: Int
     let isIncrementing: Bool
