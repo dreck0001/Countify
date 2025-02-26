@@ -14,6 +14,7 @@ struct CountSessionListView: View {
     @Binding var showingRenameAlert: Bool
     @Binding var showingNewSession: Bool
     
+    @State private var newCounterName: String = ""
     @State private var searchText = ""
     
     // Filter sessions based on search text
@@ -110,29 +111,27 @@ struct CountSessionListView: View {
             }
             .navigationTitle("Countify")
             .onAppear {
-                if actionSheetSession != nil {
-                    showingRenameAlert = false
+                if let session = actionSheetSession {
+                    // Initialize newCounterName with the current session name when action sheet appears
+                    newCounterName = session.name
                 }
             }
             .onChange(of: showingRenameAlert) { oldValue, newValue in
                 if newValue && actionSheetSession != nil {
-                    // This handles the rename action from the action sheet
+                    // Update newCounterName whenever the rename alert appears
+                    newCounterName = actionSheetSession?.name ?? ""
                 }
             }
             .alert("Rename Counter", isPresented: $showingRenameAlert) {
-                TextField("Counter Name", text: Binding(
-                    get: { actionSheetSession?.name ?? "" },
-                    set: { newName in
-                        if let session = actionSheetSession, !newName.isEmpty {
-                            var updatedSession = session
-                            updatedSession.name = newName
-                            sessionManager.saveSession(updatedSession)
-                        }
-                    }
-                ))
+                // Use newCounterName state variable for the TextField
+                TextField("Counter Name", text: $newCounterName)
                 
                 Button("Save") {
-                    // The binding above handles the save action
+                    if let session = actionSheetSession, !newCounterName.isEmpty {
+                        var updatedSession = session
+                        updatedSession.name = newCounterName
+                        sessionManager.saveSession(updatedSession)
+                    }
                 }
                 
                 Button("Cancel", role: .cancel) {}
