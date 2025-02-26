@@ -29,7 +29,6 @@ struct CountSession: Identifiable, Codable {
          lowerLimit: Int? = nil) {
         self.id = id
         self.name = name
-        self.count = count
         self.date = date
         self.hapticEnabled = hapticEnabled
         self.allowNegatives = allowNegatives
@@ -43,6 +42,16 @@ struct CountSession: Identifiable, Codable {
             self.upperLimit = upperLimit
             self.lowerLimit = lowerLimit
         }
+        
+        // Adjust count to respect limits
+        var adjustedCount = count
+        if let lower = lowerLimit, adjustedCount < lower {
+            adjustedCount = lower
+        }
+        if let upper = upperLimit, adjustedCount > upper {
+            adjustedCount = upper
+        }
+        self.count = adjustedCount
     }
     
     // Helper computed properties

@@ -34,10 +34,20 @@ class CountSessionManager: ObservableObject {
     }
     
     func saveSession(_ session: CountSession) {
-        if let index = sessions.firstIndex(where: { $0.id == session.id }) {
-            sessions[index] = session
+        var adjustedSession = session
+        
+        // Ensure count respects limits
+        if let lowerLimit = session.lowerLimit, adjustedSession.count < lowerLimit {
+            adjustedSession.count = lowerLimit
+        }
+        if let upperLimit = session.upperLimit, adjustedSession.count > upperLimit {
+            adjustedSession.count = upperLimit
+        }
+        
+        if let index = sessions.firstIndex(where: { $0.id == adjustedSession.id }) {
+            sessions[index] = adjustedSession
         } else {
-            sessions.append(session)
+            sessions.append(adjustedSession)
         }
         saveSessions()
     }

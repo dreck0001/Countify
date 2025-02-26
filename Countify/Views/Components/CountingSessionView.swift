@@ -1336,6 +1336,14 @@ struct LimitsSheet: View {
         var updatedSession = session
         updatedSession.upperLimit = finalUpperLimit
         updatedSession.lowerLimit = finalLowerLimit
+        
+        // Adjust count if needed to respect the new limits
+        if let lowerLimit = finalLowerLimit, updatedSession.count < lowerLimit {
+            updatedSession.count = lowerLimit
+        } else if let upperLimit = finalUpperLimit, updatedSession.count > upperLimit {
+            updatedSession.count = upperLimit
+        }
+        
         session = updatedSession
         sessionManager.saveSession(updatedSession)
         
@@ -1494,6 +1502,16 @@ struct NegativesSheet: View {
     private func saveNegatives() {
         var updatedSession = session
         updatedSession.allowNegatives = allowNegatives
+        
+        // If negatives are disabled and count is negative, adjust count to 0 or lower limit
+        if !allowNegatives && updatedSession.count < 0 {
+            if let lowerLimit = updatedSession.lowerLimit, lowerLimit >= 0 {
+                updatedSession.count = lowerLimit
+            } else {
+                updatedSession.count = 0
+            }
+        }
+        
         session = updatedSession
         sessionManager.saveSession(updatedSession)
         
