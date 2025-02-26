@@ -61,9 +61,7 @@ struct ModernActionSheet<Content: View>: View {
             }
             .padding(.horizontal, 20)
             .background(
-                // Modern glass effect background
                 ZStack {
-                    // Blurred background layer
                     RoundedRectangle(cornerRadius: cornerRadius)
                         .fill(Color(.systemBackground).opacity(0.8))
                         .background(
@@ -71,9 +69,9 @@ struct ModernActionSheet<Content: View>: View {
                                 .cornerRadius(cornerRadius)
                         )
                     
-                    // Subtle border for definition
+                    // Clear gray border
                     RoundedRectangle(cornerRadius: cornerRadius)
-                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                        .strokeBorder(Color.gray.opacity(0.3), lineWidth: 1.5)
                 }
             )
             .compositingGroup() // Ensures the shadow applies to the entire group

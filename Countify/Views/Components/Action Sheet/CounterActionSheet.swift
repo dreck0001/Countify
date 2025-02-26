@@ -123,9 +123,7 @@ struct CounterActionSheet: View {
             }
             .padding(.horizontal, 20)
             .background(
-                // Two-layer background for depth and glass effect
                 ZStack {
-                    // Blurred background layer (subtle glass effect)
                     RoundedRectangle(cornerRadius: cornerRadius)
                         .fill(Color(.systemBackground).opacity(0.8))
                         .background(
@@ -133,9 +131,9 @@ struct CounterActionSheet: View {
                                 .cornerRadius(cornerRadius)
                         )
                     
-                    // Border for definition
+                    // Clear gray border
                     RoundedRectangle(cornerRadius: cornerRadius)
-                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                        .strokeBorder(Color.gray.opacity(0.3), lineWidth: 1.5)
                 }
             )
             .compositingGroup() // Ensures the shadow applies to the entire group
