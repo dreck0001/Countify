@@ -162,6 +162,7 @@ struct CountingSessionView: View {
             .padding(.bottom, 30)
         }
         .navigationBarBackButtonHidden(true)
+        .swipeToGoBack(dismiss: dismiss)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: { dismiss() }) {
