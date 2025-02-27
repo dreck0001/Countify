@@ -36,7 +36,7 @@ class CountSessionManager: ObservableObject {
     func saveSession(_ session: CountSession) {
         var adjustedSession = session
         
-        // Ensure count respects limits
+        // Ensure count strictly respects limits
         if let lowerLimit = session.lowerLimit, adjustedSession.count < lowerLimit {
             adjustedSession.count = lowerLimit
         }
@@ -44,6 +44,7 @@ class CountSessionManager: ObservableObject {
             adjustedSession.count = upperLimit
         }
         
+        // Save the adjusted session
         if let index = sessions.firstIndex(where: { $0.id == adjustedSession.id }) {
             sessions[index] = adjustedSession
         } else {

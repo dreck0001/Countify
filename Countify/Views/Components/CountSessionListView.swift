@@ -478,64 +478,13 @@ struct EnhancedCounterControlsView: View {
 }
 
 // Enhanced buttons with glass effect
-struct EnhancedDecrementButton: View {
-    @Binding var session: CountSession
-    @Binding var isIncrementing: Bool
-    let onSave: () -> Void
-    
-    private var canDecrement: Bool {
-        if let lowerLimit = session.lowerLimit {
-            return session.count > lowerLimit
-        }
-        return session.allowNegatives || session.count > 0
-    }
-    
-    var body: some View {
-        Button(action: {
-            if canDecrement {
-                isIncrementing = false
-                if session.hapticEnabled {
-                    HapticManager.shared.playHaptic(style: .decrement)
-                }
-                session.count -= session.stepSize
-                onSave()
-            }
-        }) {
-            ZStack {
-                Circle()
-                    .fill(canDecrement ?
-                          Color.red.opacity(0.15) :
-                          Color.gray.opacity(0.1))
-                    .frame(width: 80, height: 80)
-                    .overlay(
-                        Circle()
-                            .strokeBorder(
-                                canDecrement ?
-                                    Color.red.opacity(0.3) :
-                                    Color.gray.opacity(0.2),
-                                lineWidth: 1
-                            )
-                    )
-                
-                Text("−")
-                    .font(.system(size: 44, weight: .medium))
-                    .foregroundColor(canDecrement ? .red : .gray)
-            }
-        }
-        .disabled(!canDecrement)
-    }
-}
-
 struct EnhancedIncrementButton: View {
     @Binding var session: CountSession
     @Binding var isIncrementing: Bool
     let onSave: () -> Void
     
     private var canIncrement: Bool {
-        if let upperLimit = session.upperLimit {
-            return session.count < upperLimit
-        }
-        return true
+        session.canIncrement
     }
     
     var body: some View {
@@ -545,7 +494,11 @@ struct EnhancedIncrementButton: View {
                 if session.hapticEnabled {
                     HapticManager.shared.playHaptic(style: .increment)
                 }
-                session.count += session.stepSize
+                
+                var updatedSession = session
+                _ = updatedSession.incrementWithinLimits()
+                session = updatedSession
+                
                 onSave()
             }
         }) {
@@ -571,6 +524,55 @@ struct EnhancedIncrementButton: View {
             }
         }
         .disabled(!canIncrement)
+    }
+}
+
+struct EnhancedDecrementButton: View {
+    @Binding var session: CountSession
+    @Binding var isIncrementing: Bool
+    let onSave: () -> Void
+    
+    private var canDecrement: Bool {
+        session.canDecrement
+    }
+    
+    var body: some View {
+        Button(action: {
+            if canDecrement {
+                isIncrementing = false
+                if session.hapticEnabled {
+                    HapticManager.shared.playHaptic(style: .decrement)
+                }
+                
+                var updatedSession = session
+                _ = updatedSession.decrementWithinLimits()
+                session = updatedSession
+                
+                onSave()
+            }
+        }) {
+            ZStack {
+                Circle()
+                    .fill(canDecrement ?
+                          Color.red.opacity(0.15) :
+                          Color.gray.opacity(0.1))
+                    .frame(width: 80, height: 80)
+                    .overlay(
+                        Circle()
+                            .strokeBorder(
+                                canDecrement ?
+                                    Color.red.opacity(0.3) :
+                                    Color.gray.opacity(0.2),
+                                lineWidth: 1
+                            )
+                    )
+                
+                Text("−")
+                    .font(.system(size: 44, weight: .medium))
+                    .foregroundColor(canDecrement ? .red : .gray)
+            }
+        }
+        .disabled(!canDecrement)
     }
 }
 

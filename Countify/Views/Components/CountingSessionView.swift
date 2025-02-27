@@ -33,13 +33,8 @@ struct CountingSessionView: View {
         VStack(spacing: 0) {
             // Counter Display taking up top third
             CounterDisplayView(count: session.count, isIncrementing: isIncrementing)
-                .background(Color.gray)
-
-            // Session Title
-            Text(session.name)
-                .font(.system(size: 28, weight: .bold))
-                .padding(.bottom, 8)
-            
+                .background(Color.gray.opacity(0.5))
+            Divider()
             // Feature Tags Row - larger and tappable
             HStack(spacing: 24) {
                 // Step Size Feature
@@ -161,6 +156,7 @@ struct CountingSessionView: View {
             )
             .padding(.bottom, 30)
         }
+        .navigationTitle(session.name).toolbarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .swipeToGoBack(dismiss: dismiss)
         .toolbar {
@@ -1714,7 +1710,7 @@ struct FeedbackTypeCard: View {
         CountingSessionView(
             session: CountSession(
                 name: "Daily Steps",
-                count: 8423,
+                count: 12345,
                 hapticEnabled: true,
                 allowNegatives: true,
                 stepSize: 5,

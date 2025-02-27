@@ -13,12 +13,7 @@ struct DecrementButton: View {
     let onSave: () -> Void
     
     private var canDecrement: Bool {
-        // If there's a lower limit, check against it
-        if let lowerLimit = session.lowerLimit {
-            return session.count > lowerLimit
-        }
-        // Otherwise, check if negatives are allowed or if count is positive
-        return session.allowNegatives || session.count > 0
+        session.canDecrement
     }
     
     var body: some View {
@@ -28,7 +23,11 @@ struct DecrementButton: View {
                 if session.hapticEnabled {
                     HapticManager.shared.playHaptic(style: .decrement)
                 }
-                session.count -= session.stepSize
+                
+                var updatedSession = session
+                _ = updatedSession.decrementWithinLimits()
+                session = updatedSession
+                
                 onSave()
             }
         }) {
@@ -50,12 +49,7 @@ struct IncrementButton: View {
     let onSave: () -> Void
     
     private var canIncrement: Bool {
-        // If there's an upper limit, check against it
-        if let upperLimit = session.upperLimit {
-            return session.count < upperLimit
-        }
-        // No upper limit, always allow increment
-        return true
+        session.canIncrement
     }
     
     var body: some View {
@@ -65,7 +59,11 @@ struct IncrementButton: View {
                 if session.hapticEnabled {
                     HapticManager.shared.playHaptic(style: .increment)
                 }
-                session.count += session.stepSize
+                
+                var updatedSession = session
+                _ = updatedSession.incrementWithinLimits()
+                session = updatedSession
+                
                 onSave()
             }
         }) {

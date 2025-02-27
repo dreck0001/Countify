@@ -45,7 +45,7 @@ struct LargeCountSessionCard: View {
                 .font(.system(size: 35, weight: .bold))
                 .minimumScaleFactor(0.6)
                 .lineLimit(1)
-                .foregroundColor(.white)
+//                .foregroundColor(.white)
                 .frame(width: UIScreen.main.bounds.width * 2/7)
             
             Divider()
@@ -53,7 +53,7 @@ struct LargeCountSessionCard: View {
             VStack( spacing: 15) {
                 Text(session.name)
                     .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.white)
+//                    .foregroundColor(.white)
                     
                 
                 // Feature indicators as simple icons in a row
@@ -62,16 +62,16 @@ struct LargeCountSessionCard: View {
                         FeatureTag(icon: "arrow.up.arrow.down", text: "")
                     }
                     
-                    if session.hapticEnabled {
-                        FeatureTag(icon: "waveform", text: "")
+                    if session.upperLimit != nil || session.lowerLimit != nil {
+                        FeatureTag(icon: "ruler", text: "")
                     }
                     
                     if session.allowNegatives {
                         FeatureTag(icon: "plusminus", text: "")
                     }
                     
-                    if session.upperLimit != nil || session.lowerLimit != nil {
-                        FeatureTag(icon: "ruler", text: "")
+                    if session.hapticEnabled {
+                        FeatureTag(icon: "waveform", text: "")
                     }
                 }
                 

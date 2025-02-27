@@ -65,3 +65,49 @@ struct CountSession: Identifiable, Codable {
         return count <= lowerLimit
     }
 }
+
+extension CountSession {
+    // Check if increment by step size is allowed
+    var canIncrement: Bool {
+        guard let upperLimit = upperLimit else { return true }
+        return count + stepSize <= upperLimit
+    }
+    
+    // Check if decrement by step size is allowed
+    var canDecrement: Bool {
+        if let lowerLimit = lowerLimit {
+            return count - stepSize >= lowerLimit
+        }
+        return allowNegatives || count >= stepSize
+    }
+    
+    // Safe increment that respects limits
+    mutating func incrementWithinLimits() -> Bool {
+        if canIncrement {
+            count += stepSize
+            return true
+        } else if let upperLimit = upperLimit, count < upperLimit {
+            // If we can't increment by full step size but can get closer to limit
+            count = upperLimit
+            return true
+        }
+        return false
+    }
+    
+    // Safe decrement that respects limits
+    mutating func decrementWithinLimits() -> Bool {
+        if canDecrement {
+            count -= stepSize
+            return true
+        } else if let lowerLimit = lowerLimit, count > lowerLimit {
+            // If we can't decrement by full step size but can get closer to limit
+            count = lowerLimit
+            return true
+        } else if !allowNegatives && count > 0 && count < stepSize {
+            // If we can't go below zero but can get to zero
+            count = 0
+            return true
+        }
+        return false
+    }
+}
