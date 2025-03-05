@@ -8,11 +8,28 @@
 import SwiftUI
 
 struct CountifyAppIcon: View {
+    @Binding var session: CountSession
+    @Binding var isIncrementing: Bool
+    let onSave: () -> Void
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        ZStack {
+            HStack {
+                Spacer()
+                EnhancedDecrementButton(session: $session, isIncrementing: $isIncrementing, onSave: onSave)
+                    .offset(x: 30, y: 0)
+                EnhancedIncrementButton(session: $session, isIncrementing: $isIncrementing, onSave: onSave)
+                Spacer()
+            }
+        }
+        .padding(.horizontal, 16)
     }
 }
 
 #Preview {
-    CountifyAppIcon()
+    CountifyAppIcon(
+        session: .constant(CountSession(name: "Counter", count: 5)),
+        isIncrementing: .constant(true),
+        onSave: {}
+    )
 }

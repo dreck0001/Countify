@@ -101,7 +101,7 @@ struct CountSessionListView: View {
                                         .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
                         
                                     Image(systemName: "plus")
-                                        .font(.system(size: 24, weight: .semibold))
+                                        .font(.system(size: 40, weight: .semibold))
                                         .foregroundColor(.white)
                                 }
                             }
@@ -519,7 +519,7 @@ struct EnhancedIncrementButton: View {
                     )
                 
                 Text("+")
-                    .font(.system(size: 44, weight: .medium))
+                    .font(.system(size: 50, weight: .medium))
                     .foregroundColor(canIncrement ? .green : .gray)
             }
         }
@@ -568,7 +568,7 @@ struct EnhancedDecrementButton: View {
                     )
                 
                 Text("−")
-                    .font(.system(size: 44, weight: .medium))
+                    .font(.system(size: 50, weight: .medium))
                     .foregroundColor(canDecrement ? .red : .gray)
             }
         }
