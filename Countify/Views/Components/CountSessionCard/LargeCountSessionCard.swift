@@ -71,7 +71,7 @@ struct LargeCountSessionCard: View {
                     }
                     
                     if session.hapticEnabled {
-                        FeatureTag(icon: "waveform", text: "")
+                        FeatureTag(icon: "hand.tap", text: "")
                     }
                 }
                 

@@ -7,29 +7,78 @@
 
 import SwiftUI
 
-struct CountifyAppIcon: View {
-    @Binding var session: CountSession
-    @Binding var isIncrementing: Bool
-    let onSave: () -> Void
+struct CountifyAppIconUI: View {
+    var size: CGFloat = 80 // Configurable size parameter
+    var incrementColor: Color = .green
+    var decrementColor: Color = .red
     
     var body: some View {
-        ZStack {
-            HStack {
-                Spacer()
-                EnhancedDecrementButton(session: $session, isIncrementing: $isIncrementing, onSave: onSave)
-                    .offset(x: 30, y: 0)
-                EnhancedIncrementButton(session: $session, isIncrementing: $isIncrementing, onSave: onSave)
-                Spacer()
+        HStack {
+            Spacer()
+            // Decrement button visual (non-functional)
+            ZStack {
+                Circle()
+                    .fill(decrementColor.opacity(0.15))
+                    .frame(width: size, height: size)
+                    .overlay(
+                        Circle()
+                            .strokeBorder(
+                                decrementColor.opacity(0.3),
+                                lineWidth: 1
+                            )
+                    )
+                
+                Text("−")
+                    .font(.system(size: size * 0.625, weight: .medium))
+                    .foregroundColor(decrementColor)
             }
+            .offset(x: 20, y: 0)
+            
+            // Increment button visual (non-functional)
+            ZStack {
+                Circle()
+                    .fill(incrementColor.opacity(0.15))
+                    .frame(width: size, height: size)
+                    .overlay(
+                        Circle()
+                            .strokeBorder(
+                                incrementColor.opacity(0.3),
+                                lineWidth: 1
+                            )
+                    )
+                
+                Text("+")
+                    .font(.system(size: size * 0.625, weight: .medium))
+                    .foregroundColor(incrementColor)
+            }
+            .offset(x: -20, y: 0)
+            Spacer()
         }
-        .padding(.horizontal, 16)
     }
 }
-
 #Preview {
-    CountifyAppIcon(
-        session: .constant(CountSession(name: "Counter", count: 5)),
-        isIncrementing: .constant(true),
-        onSave: {}
-    )
+    VStack {
+        // Standard size
+        CountifyAppIconUI()
+            .padding()
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(20)
+        
+        // Small icon size
+        CountifyAppIconUI(size: 40)
+            .padding()
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(20)
+        
+        // Large icon size with custom colors
+        CountifyAppIconUI(
+            size: 100,
+            incrementColor: .blue,
+            decrementColor: .orange
+        )
+        .padding()
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(20)
+    }
+    .padding()
 }

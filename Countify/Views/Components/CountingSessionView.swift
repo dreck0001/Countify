@@ -130,7 +130,7 @@ struct CountingSessionView: View {
                                 .frame(width: 56, height: 56)
                                 .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                             
-                            Image(systemName: "waveform")
+                            Image(systemName: "hand.tap")
                                 .font(.system(size: 20, weight: .medium))
                                 .foregroundColor(session.hapticEnabled ? .green : .gray)
                         }
@@ -1674,7 +1674,7 @@ struct FeedbackTypeCard: View {
                 
                 Spacer()
                 
-                Image(systemName: "waveform")
+                Image(systemName: "hand.tap")
                     .font(.system(size: 12))
                     .foregroundColor(isEnabled ? color.opacity(0.8) : .gray.opacity(0.5))
             }

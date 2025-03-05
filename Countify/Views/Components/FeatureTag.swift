@@ -35,7 +35,7 @@ struct FeatureTag: View {
 #Preview(traits: .sizeThatFitsLayout) {
     HStack {
         FeatureTag(icon: "arrow.up.arrow.down", text: "5")
-        FeatureTag(icon: "waveform", text: "")
+        FeatureTag(icon: "hand.tap", text: "")
         FeatureTag(icon: "plusminus", text: "")
         FeatureTag(icon: "ruler", text: "")
     }

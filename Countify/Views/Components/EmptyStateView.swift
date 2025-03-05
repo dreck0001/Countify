@@ -14,13 +14,7 @@ struct EmptyStateView: View {
         VStack(alignment: .center, spacing: 20) {
             ScrollView {
                 VStack(spacing: 24) {
-                    Image(systemName: "minus.forwardslash.plus")
-                        .font(.system(size: 70, weight: .light))
-                        .foregroundStyle(.linearGradient(
-                            colors: [.blue, .blue.opacity(0.6)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ))
+                    CountifyAppIconUI(size: 180)
                         .padding(.top, 20)
                     
                     VStack(spacing: 4) {
@@ -39,7 +33,7 @@ struct EmptyStateView: View {
                         GridItem(.flexible(), spacing: 16)
                     ], spacing: 16) {
                         FeatureCard(
-                            icon: "number.circle.fill",
+                            icon: "rectangle.stack",
                             title: "Multiple Sessions",
                             description: "Create and manage multiple counting sessions"
                         )
@@ -55,19 +49,19 @@ struct EmptyStateView: View {
                     VStack(spacing: 24) {
                         // Customizable Experiences - Multiple cards
                         WideFeatureCard(
-                            icon: "123.rectangle",
+                            icon: "arrow.up.arrow.down",
                             title: "Custom Step Sizes",
                             description: "Increment or decrement by any value - perfect for counting by 2s, 5s, or any number you choose"
                         )
                         
                         WideFeatureCard(
-                            icon: "arrow.up.arrow.down.square",
+                            icon: "ruler",
                             title: "Set Counting Limits",
                             description: "Define upper and lower bounds for your counters to prevent going beyond desired ranges"
                         )
                         
                         WideFeatureCard(
-                            icon: "hand.tap.fill",
+                            icon: "hand.tap",
                             title: "Haptic Feedback",
                             description: "Feel distinct vibration patterns for different actions - increment, decrement, and reset operations"
                         )

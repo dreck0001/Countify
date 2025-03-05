@@ -238,7 +238,7 @@ struct LargeCountCard: View {
                     }
                     
                     if session.hapticEnabled {
-                        FeatureTag(icon: "waveform", text: "")
+                        FeatureTag(icon: "hand.tap", text: "")
                     }
                     
                     if session.allowNegatives {
@@ -338,7 +338,7 @@ struct CollapsibleFeaturesView: View {
             // First row: Primary features
             HStack(spacing: 12) {
                 CounterFeatureCard(
-                    icon: "hand.tap.fill",
+                    icon: "hand.tap",
                     title: "Haptic",
                     value: session.hapticEnabled ? "On" : "Off",
                     color: .blue
