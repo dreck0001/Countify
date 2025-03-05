@@ -101,7 +101,7 @@ struct CountSessionListView: View {
                                         .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
                         
                                     Image(systemName: "plus")
-                                        .font(.system(size: 40, weight: .semibold))
+                                        .font(.system(size: 24, weight: .semibold))
                                         .foregroundColor(.white)
                                 }
                             }
