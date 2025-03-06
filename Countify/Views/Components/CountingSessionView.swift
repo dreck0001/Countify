@@ -929,7 +929,7 @@ struct LimitsSheet: View {
                                     )
                                     .scaleEffect(isLongPressingLowerDecrement ? 0.9 : 1.0)
                             }
-                            .disabled(!enableLowerLimit)
+                            .disabled(!enableLowerLimit || (!session.allowNegatives && lowerLimit <= 0))
                             // Long press gesture
                             .simultaneousGesture(
                                 LongPressGesture(minimumDuration: 0.5)
@@ -968,8 +968,13 @@ struct LimitsSheet: View {
                                     // Filter non-numeric characters and handle negative sign
                                     var filtered = newValue
                                     if filtered.first == "-" {
-                                        filtered.removeFirst()
-                                        filtered = "-" + filtered.filter { "0123456789".contains($0) }
+                                        // Only allow negative sign if negatives are permitted
+                                        if session.allowNegatives {
+                                            filtered.removeFirst()
+                                            filtered = "-" + filtered.filter { "0123456789".contains($0) }
+                                        } else {
+                                            filtered = filtered.filter { "0123456789".contains($0) }
+                                        }
                                     } else {
                                         filtered = filtered.filter { "0123456789".contains($0) }
                                     }
@@ -980,7 +985,13 @@ struct LimitsSheet: View {
                                     
                                     // Update lower limit if valid
                                     if let value = Int(filtered) {
-                                        lowerLimit = value
+                                        // Enforce non-negative if negatives aren't allowed
+                                        if !session.allowNegatives && value < 0 {
+                                            lowerLimit = 0
+                                            lowerLimitString = "0"
+                                        } else {
+                                            lowerLimit = value
+                                        }
                                         
                                         // Ensure upper limit stays above lower limit
                                         if enableUpperLimit && upperLimit <= lowerLimit {
@@ -1127,6 +1138,14 @@ struct LimitsSheet: View {
                                             lowerLimit = 10
                                             lowerLimitString = "10"
                                         })
+                                        
+                                        // Only show negative presets if negatives are allowed
+                                        if session.allowNegatives {
+                                            limitPresetButton(value: -10, isSelected: lowerLimit == -10, action: {
+                                                lowerLimit = -10
+                                                lowerLimitString = "-10"
+                                            })
+                                        }
                                     }
                                 }
                             }
@@ -1315,6 +1334,14 @@ struct LimitsSheet: View {
     }
     
     private func decrementLowerLimit() {
+        // Don't allow going below 0 if negatives are not allowed
+        if !session.allowNegatives && lowerLimit - changeRate < 0 {
+            lowerLimit = 0
+            lowerLimitString = "0"
+            stopTimers()
+            return
+        }
+        
         lowerLimit -= changeRate
         lowerLimitString = "\(lowerLimit)"
         
@@ -1331,11 +1358,18 @@ struct LimitsSheet: View {
         let finalLowerLimit = enableLowerLimit ? (Int(lowerLimitString) ?? lowerLimit) : nil
         
         var updatedSession = session
+        
+        // If negatives aren't allowed, ensure lower limit is non-negative
+        if !session.allowNegatives && finalLowerLimit != nil && finalLowerLimit! < 0 {
+            updatedSession.lowerLimit = 0
+        } else {
+            updatedSession.lowerLimit = finalLowerLimit
+        }
+        
         updatedSession.upperLimit = finalUpperLimit
-        updatedSession.lowerLimit = finalLowerLimit
         
         // Adjust count if needed to respect the new limits
-        if let lowerLimit = finalLowerLimit, updatedSession.count < lowerLimit {
+        if let lowerLimit = updatedSession.lowerLimit, updatedSession.count < lowerLimit {
             updatedSession.count = lowerLimit
         } else if let upperLimit = finalUpperLimit, updatedSession.count > upperLimit {
             updatedSession.count = upperLimit
@@ -1357,7 +1391,6 @@ struct LimitsSheet: View {
         }
     }
 }
-
 
 // MARK: - NegativesSheet
 struct NegativesSheet: View {
@@ -1499,6 +1532,11 @@ struct NegativesSheet: View {
     private func saveNegatives() {
         var updatedSession = session
         updatedSession.allowNegatives = allowNegatives
+        
+        // If negatives are disabled and a lower limit is set, update the lower limit
+        if !allowNegatives && updatedSession.lowerLimit != nil && updatedSession.lowerLimit! < 0 {
+            updatedSession.lowerLimit = 0
+        }
         
         // If negatives are disabled and count is negative, adjust count to 0 or lower limit
         if !allowNegatives && updatedSession.count < 0 {
