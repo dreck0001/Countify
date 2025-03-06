@@ -33,7 +33,7 @@ struct CountingSessionView: View {
         VStack(spacing: 0) {
             // Counter Display taking up top third
             CounterDisplayView(count: session.count, isIncrementing: isIncrementing)
-                .background(Color.gray.opacity(0.5))
+//                .background(Color.gray.opacity(0.5))
             Divider()
             // Feature Tags Row - larger and tappable
             HStack(spacing: 24) {
@@ -143,9 +143,9 @@ struct CountingSessionView: View {
                 }
                 .buttonStyle(ScaleButtonStyle())
             }
-            .padding(.top, 24)
-            .padding(.bottom, 8)
-            
+            .padding(.top, 20)
+            .padding(.bottom, 20)
+            Divider()
             Spacer()
             
             // Counter Controls at bottom
@@ -156,17 +156,11 @@ struct CountingSessionView: View {
             )
             .padding(.bottom, 30)
         }
-        .navigationTitle(session.name).toolbarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .swipeToGoBack(dismiss: dismiss)
+        .navigationTitle(session.name)
+        .toolbarTitleDisplayMode(.inline)
+//        .background(Color(.systemBackground))
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.backward")
-                        .font(.system(size: 20))
-                        .foregroundColor(.primary)
-                }
-            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
                     Button(action: {
@@ -183,11 +177,9 @@ struct CountingSessionView: View {
                 } label: {
                     Image(systemName: "ellipsis")
                         .font(.system(size: 20))
-                        .foregroundColor(.primary)
                 }
             }
-        }
-        .alert("Reset Counter", isPresented: $showingResetConfirmation) {
+        }        .alert("Reset Counter", isPresented: $showingResetConfirmation) {
             Button("Reset", role: .destructive) {
                 if session.hapticEnabled {
                     // Double haptic feedback for reset action
