@@ -20,12 +20,15 @@ struct NewSessionView: View {
     @State private var lowerLimit = 0
     @State private var navigateToCounter = false
     @State private var newSession: CountSession?
+    // To control focus on the name field
+    @FocusState private var isNameFieldFocused: Bool
     
     var body: some View {
         NavigationStack {
             Form {
                 Section(header: Text("Session Name")) {
-                    TextField("Name", text: $sessionName)
+                    TextField("Name your counter", text: $sessionName)
+                        .focused($isNameFieldFocused)
                 }
                 
                 Section(header: Text("Counter Settings")) {
@@ -46,21 +49,11 @@ struct NewSessionView: View {
                     }
                 }
             }
-            .navigationTitle("New Count Session")
+            .navigationTitle("New Counter")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Create") {
-                        let session = CountSession(
-                            name: sessionName.isEmpty ? "New Count" : sessionName,
-                            hapticEnabled: hapticEnabled,
-                            allowNegatives: allowNegatives,
-                            stepSize: max(1, stepSize),  // Ensure step size is at least 1
-                            upperLimit: enableUpperLimit ? upperLimit : nil,
-                            lowerLimit: enableLowerLimit ? lowerLimit : nil
-                        )
-                        sessionManager.saveSession(session)
-                        newSession = session
-                        navigateToCounter = true
+                        createSession()
                     }
                 }
                 
@@ -82,8 +75,65 @@ struct NewSessionView: View {
                         }
                 }
             }
+            .onAppear {
+                // Only set default name if it's currently empty
+                if sessionName.isEmpty {
+                    sessionName = generateDefaultName()
+                }
+                
+                // Auto-focus the name field after a short delay
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    isNameFieldFocused = true
+                }
+            }
         }
         .interactiveDismissDisabled(navigateToCounter)
+    }
+    
+    // Function to generate a sequential default name: Counter 1, Counter 2, etc.
+    private func generateDefaultName() -> String {
+        // Find the highest counter number currently in use
+        var highestNumber = 0
+        
+        for session in sessionManager.sessions {
+            if session.name.hasPrefix("Counter ") {
+                if let numberStr = session.name.dropFirst(8).trimmingCharacters(in: .whitespacesAndNewlines).components(separatedBy: .whitespaces).first,
+                   let number = Int(numberStr) {
+                    highestNumber = max(highestNumber, number)
+                }
+            }
+        }
+        
+        // Return the next number in sequence
+        return "Counter \(highestNumber + 1)"
+    }
+    
+    private func createSession() {
+        // Use entered name or generate unique name if empty
+        var finalName = sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if finalName.isEmpty {
+            finalName = generateDefaultName()
+        }
+        
+        // Create and save the session
+        let session = CountSession(
+            name: finalName,
+            hapticEnabled: hapticEnabled,
+            allowNegatives: allowNegatives,
+            stepSize: max(1, stepSize),
+            upperLimit: enableUpperLimit ? upperLimit : nil,
+            lowerLimit: enableLowerLimit ? lowerLimit : nil
+        )
+        
+        sessionManager.saveSession(session)
+        newSession = session
+        navigateToCounter = true
+        
+        // Provide haptic feedback on successful creation if enabled
+        if hapticEnabled {
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.success)
+        }
     }
 }
 
