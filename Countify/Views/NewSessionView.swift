@@ -34,6 +34,12 @@ struct NewSessionView: View {
                 Section(header: Text("Counter Settings")) {
                     Stepper("Step Size: \(stepSize)", value: $stepSize, in: 1...100)
                     Toggle("Allow Negative Numbers", isOn: $allowNegatives)
+                        .onChange(of: allowNegatives) { _, newValue in
+                            // If we disallow negatives, ensure lower limit is non-negative
+                            if !newValue && enableLowerLimit && lowerLimit < 0 {
+                                lowerLimit = 0
+                            }
+                        }
                     Toggle("Vibration", isOn: $hapticEnabled)
                 }
                 
@@ -45,7 +51,12 @@ struct NewSessionView: View {
                     
                     Toggle("Set Lower Limit", isOn: $enableLowerLimit)
                     if enableLowerLimit {
-                        Stepper("Lower Limit: \(lowerLimit)", value: $lowerLimit)
+                        // If negative numbers aren't allowed, enforce a minimum of 0
+                        if !allowNegatives {
+                            Stepper("Lower Limit: \(lowerLimit)", value: $lowerLimit, in: 0...Int.max)
+                        } else {
+                            Stepper("Lower Limit: \(lowerLimit)", value: $lowerLimit)
+                        }
                     }
                 }
             }
