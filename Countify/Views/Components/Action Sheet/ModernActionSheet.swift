@@ -17,12 +17,16 @@ struct ModernActionSheet<Content: View>: View {
     @State private var offset = CGSize.zero
     @State private var isDragging = false
     
+    // For keyboard avoidance
+    @State private var keyboardHeight: CGFloat = 0
+    
     // Animation configurations for smooth transitions
     private let springAnimation = Animation.spring(response: 0.4, dampingFraction: 0.8)
     private let appearAnimation = Animation.spring(response: 0.55, dampingFraction: 0.7)
     
-    // Sheet dimensions and styling
-    private let cornerRadius: CGFloat = 32
+    // Sheet dimensions and styling - full width with rounded top corners only
+    private let topCornerRadius: CGFloat = 16  // Increased corner radius
+    private let sheetWidth: CGFloat = UIScreen.main.bounds.width
     
     init(isPresented: Binding<Bool>, title: String, @ViewBuilder content: () -> Content) {
         self._isPresented = isPresented
@@ -32,6 +36,7 @@ struct ModernActionSheet<Content: View>: View {
     
     var body: some View {
         ZStack {
+            // Semi-transparent backdrop
             Color.black.opacity(0.35)
                 .ignoresSafeArea()
                 .opacity(isPresented ? 1 : 0)
@@ -40,55 +45,52 @@ struct ModernActionSheet<Content: View>: View {
                     dismissWithAnimation()
                 }
             
-            // Main content sheet
+            // Main content sheet - full width with rounded top corners, Instagram style
             VStack(spacing: 0) {
-                // Drag indicator with animation on drag
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(Color.gray.opacity(0.4))
-                    .frame(width: 40, height: 6)
-                    .padding(.top, 14)
-                    .padding(.bottom, 8)
+                // Drag indicator with animation on drag - Instagram style
+                RoundedRectangle(cornerRadius: 2.5)
+                    .fill(Color.gray.opacity(0.5))
+                    .frame(width: 40, height: 5)
+                    .padding(.top, 12)
+                    .padding(.bottom, 12)
                     .scaleEffect(isDragging ? 1.2 : 1)
                     .animation(.spring(response: 0.2), value: isDragging)
                 
                 Text(title)
-                    .font(.system(size: 20, weight: .semibold, design: .rounded))
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
                     .foregroundColor(.primary)
-                    .padding(.bottom, 20)
+                    .padding(.bottom, 16)
                 
                 content
-                    .padding(.bottom, 28)
+                    .padding(.bottom, 30) // Add extra padding at the bottom to extend beyond the visible area
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 16)
             .background(
                 ZStack {
-                    RoundedRectangle(cornerRadius: cornerRadius)
-                        .fill(Color(.systemBackground).opacity(0.8))
-                        .background(
-                            VisualEffectView(effect: UIBlurEffect(style: .systemMaterial))
-                                .cornerRadius(cornerRadius)
-                        )
+                    // Instagram-style background - completely solid
+                    RoundedCorners(tl: topCornerRadius, tr: topCornerRadius, bl: 0, br: 0)
+                        .fill(Color(.systemGray6)) // Remove opacity modifier
                     
-                    // Clear gray border
-                    RoundedRectangle(cornerRadius: cornerRadius)
-                        .strokeBorder(Color.gray.opacity(0.3), lineWidth: 1.5)
+                    // Simple top edge stroke
+                    RoundedCorners(tl: topCornerRadius, tr: topCornerRadius, bl: 0, br: 0)
+                        .stroke(Color.gray.opacity(0.15), lineWidth: 0.5)
                 }
             )
-            .compositingGroup() // Ensures the shadow applies to the entire group
-            .shadow(color: Color.black.opacity(0.15), radius: 20, x: 0, y: 10)
-            .offset(y: isPresented ? offset.height : UIScreen.main.bounds.height)
+            .frame(width: sheetWidth) // Full width sheet
+            .shadow(color: Color.black.opacity(0.1), radius: 6, x: 0, y: -2)
+            .offset(y: isPresented ? offsetWithKeyboard : UIScreen.main.bounds.height)
             .gesture(
                 DragGesture()
                     .onChanged { value in
-                        // Only allow dragging downward
-                        if value.translation.height > 0 {
+                        // Only allow dragging downward when keyboard is not showing
+                        if keyboardHeight == 0 && value.translation.height > 0 {
                             offset = value.translation
                             isDragging = true
                         }
                     }
                     .onEnded { value in
-                        // Dismiss if dragged far enough
-                        if value.translation.height > 120 || value.predictedEndTranslation.height > 200 {
+                        // Dismiss if dragged far enough when keyboard is not showing
+                        if keyboardHeight == 0 && (value.translation.height > 120 || value.predictedEndTranslation.height > 200) {
                             dismissWithAnimation()
                         } else {
                             // Spring back to original position with animation
@@ -101,21 +103,97 @@ struct ModernActionSheet<Content: View>: View {
             )
             .animation(appearAnimation, value: isPresented)
             .frame(maxHeight: .infinity, alignment: .bottom)
-            .padding(.bottom, 10)
         }
         .ignoresSafeArea()
+        .onAppear {
+            addKeyboardObservers()
+        }
+        .onDisappear {
+            removeKeyboardObservers()
+        }
+    }
+    
+    // Calculate offset including keyboard adjustments
+    private var offsetWithKeyboard: CGFloat {
+        if keyboardHeight > 0 {
+            // Push content above keyboard with some padding
+            return -keyboardHeight + 20
+        } else {
+            // Normal position with any manual drag offset
+            return offset.height
+        }
     }
     
     private func dismissWithAnimation() {
-        // Smooth dismissal animation
+        // Smooth dismissal animation without haptic feedback
         withAnimation(springAnimation) {
             isPresented = false
             offset = .zero
             isDragging = false
         }
+        // No haptic feedback when dismissing
+    }
+    
+    // Keyboard observers
+    private func addKeyboardObservers() {
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { notification in
+            let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect ?? .zero
+            let animationDuration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double ?? 0.25
+            
+            withAnimation(.easeInOut(duration: animationDuration)) {
+                self.keyboardHeight = keyboardFrame.height
+            }
+        }
+        
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { notification in
+            let animationDuration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double ?? 0.25
+            
+            withAnimation(.easeInOut(duration: animationDuration)) {
+                self.keyboardHeight = 0
+            }
+        }
+    }
+    
+    private func removeKeyboardObservers() {
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
 }
 
+
+// Custom shape for rounded corners only at the top
+struct RoundedCorners: Shape {
+    var tl: CGFloat = 0.0
+    var tr: CGFloat = 0.0
+    var bl: CGFloat = 0.0
+    var br: CGFloat = 0.0
+    
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        
+        let w = rect.size.width
+        let h = rect.size.height
+        
+        // Make sure we don't exceed the size of the rectangle
+        let tr = min(min(self.tr, h/2), w/2)
+        let tl = min(min(self.tl, h/2), w/2)
+        let bl = min(min(self.bl, h/2), w/2)
+        let br = min(min(self.br, h/2), w/2)
+        
+        path.move(to: CGPoint(x: w / 2.0, y: 0))
+        path.addLine(to: CGPoint(x: w - tr, y: 0))
+        path.addArc(center: CGPoint(x: w - tr, y: tr), radius: tr, startAngle: Angle(degrees: -90), endAngle: Angle(degrees: 0), clockwise: false)
+        path.addLine(to: CGPoint(x: w, y: h - br))
+        path.addArc(center: CGPoint(x: w - br, y: h - br), radius: br, startAngle: Angle(degrees: 0), endAngle: Angle(degrees: 90), clockwise: false)
+        path.addLine(to: CGPoint(x: bl, y: h))
+        path.addArc(center: CGPoint(x: bl, y: h - bl), radius: bl, startAngle: Angle(degrees: 90), endAngle: Angle(degrees: 180), clockwise: false)
+        path.addLine(to: CGPoint(x: 0, y: tl))
+        path.addArc(center: CGPoint(x: tl, y: tl), radius: tl, startAngle: Angle(degrees: 180), endAngle: Angle(degrees: 270), clockwise: false)
+        path.closeSubpath()
+        
+        return path
+    }
+}
 //springy button for action sheets
 struct ModernActionButton: View {
     let text: String

@@ -38,11 +38,11 @@ struct CounterActionSheet: View {
             
             // Action sheet content
             VStack(spacing: 0) {
-                // Drag indicator with subtle animation on drag
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(Color.gray.opacity(0.4))
-                    .frame(width: 40, height: 6)
-                    .padding(.top, 14)
+                // Drag indicator with subtle animation on drag - Instagram style
+                RoundedRectangle(cornerRadius: 2.5)
+                    .fill(Color.gray.opacity(0.5))
+                    .frame(width: 40, height: 5)
+                    .padding(.top, 12)
                     .padding(.bottom, 16)
                     .scaleEffect(isDragging ? 1.2 : 1)
                     .animation(.spring(response: 0.2), value: isDragging)
@@ -69,12 +69,11 @@ struct CounterActionSheet: View {
                     // Favorite action
                     VStack {
                         ActionButton(
-                            icon: "star",
-                            background: Color.gray.opacity(0.12),
-                            foreground: .primary
+                            icon: session.favorite ? "star.fill" : "star",
+                            background: session.favorite ? Color.yellow.opacity(0.15) : Color.gray.opacity(0.12),
+                            foreground: session.favorite ? .yellow : .primary
                         ) {
-                            hapticFeedback()
-                            dismiss()
+                            toggleFavorite()
                         }
                         
                         Text("Favorite")
@@ -124,20 +123,17 @@ struct CounterActionSheet: View {
             .padding(.horizontal, 20)
             .background(
                 ZStack {
+                    // Instagram-style background - completely solid
                     RoundedRectangle(cornerRadius: cornerRadius)
-                        .fill(Color(.systemBackground).opacity(0.8))
-                        .background(
-                            VisualEffectView(effect: UIBlurEffect(style: .systemMaterial))
-                                .cornerRadius(cornerRadius)
-                        )
-                    
-                    // Clear gray border
+                        .fill(Color(.systemGray6)) // Remove opacity modifier
+                        
+                    // Top edge highlight line
                     RoundedRectangle(cornerRadius: cornerRadius)
-                        .strokeBorder(Color.gray.opacity(0.3), lineWidth: 1.5)
+                        .stroke(Color.gray.opacity(0.2), lineWidth: 0.5)
                 }
             )
             .compositingGroup() // Ensures the shadow applies to the entire group
-            .shadow(color: Color.black.opacity(0.15), radius: 20, x: 0, y: 10)
+            .shadow(color: Color.black.opacity(0.08), radius: 5, x: 0, y: 0)
             .offset(y: isPresented ? offset.height : UIScreen.main.bounds.height)
             .gesture(
                 DragGesture()
@@ -168,6 +164,21 @@ struct CounterActionSheet: View {
         .ignoresSafeArea()
     }
     
+    private func toggleFavorite() {
+        var updatedSession = session
+        updatedSession.favorite = !session.favorite
+        sessionManager.saveSession(updatedSession)
+        
+        if session.hapticEnabled {
+            // Use a star-like haptic pattern
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            generator.prepare()
+            generator.impactOccurred(intensity: 0.8)
+        }
+        
+        dismiss()
+    }
+    
     // Helper methods with improved haptic feedback
     private func dismiss() {
         dismissWithAnimation()
@@ -179,6 +190,8 @@ struct CounterActionSheet: View {
             offset = .zero
             isDragging = false
         }
+        
+        // No haptic feedback when simply dismissing
     }
     
     private func resetCounter() {

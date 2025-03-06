@@ -19,12 +19,19 @@ struct CountSessionListView: View {
     
     // Filter sessions based on search text
     var filteredSessions: [CountSession] {
+        let sorted = sessionManager.sessions.sorted { (a, b) -> Bool in
+            // First sort by favorite status (favorites first)
+            if a.favorite != b.favorite {
+                return a.favorite
+            }
+            // Then sort by date (newest first)
+            return a.date > b.date
+        }
+        
         if searchText.isEmpty {
-            return sessionManager.sessions.sorted(by: { $0.date > $1.date })
+            return sorted
         } else {
-            return sessionManager.sessions
-                .filter { $0.name.lowercased().contains(searchText.lowercased()) }
-                .sorted(by: { $0.date > $1.date })
+            return sorted.filter { $0.name.lowercased().contains(searchText.lowercased()) }
         }
     }
     

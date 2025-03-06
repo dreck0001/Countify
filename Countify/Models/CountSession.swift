@@ -17,6 +17,7 @@ struct CountSession: Identifiable, Codable {
     var stepSize: Int
     var upperLimit: Int?
     var lowerLimit: Int?
+    var favorite: Bool
     
     init(id: UUID = UUID(),
          name: String = "New Count",
@@ -26,13 +27,15 @@ struct CountSession: Identifiable, Codable {
          allowNegatives: Bool = false,
          stepSize: Int = 1,
          upperLimit: Int? = nil,
-         lowerLimit: Int? = nil) {
+         lowerLimit: Int? = nil,
+         favorite: Bool = false) {
         self.id = id
         self.name = name
         self.date = date
         self.hapticEnabled = hapticEnabled
         self.allowNegatives = allowNegatives
-        self.stepSize = max(1, stepSize)  // Ensure step size is never less than 1
+        self.stepSize = max(1, stepSize)
+        self.favorite = favorite
         
         // Ensure limits are valid if provided
         if let upper = upperLimit, let lower = lowerLimit {

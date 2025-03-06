@@ -41,21 +41,25 @@ struct LargeCountSessionCard: View {
     var body: some View {
         
         HStack(spacing: 0) {
-            Text("\(session.count)")
-                .font(.system(size: 35, weight: .bold))
-                .minimumScaleFactor(0.6)
-                .lineLimit(1)
-//                .foregroundColor(.white)
-                .frame(width: UIScreen.main.bounds.width * 2/7)
-            
-            Divider()
-            
-            VStack( spacing: 15) {
-                Text(session.name)
-                    .font(.system(size: 20, weight: .semibold))
-//                    .foregroundColor(.white)
-                    
+                Text("\(session.count)")
+                    .font(.system(size: 35, weight: .bold))
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(1)
+                    .frame(width: UIScreen.main.bounds.width * 2/7)
                 
+                Divider()
+                
+                VStack(spacing: 15) {
+                    HStack {
+                        // Show star for favorited sessions
+                        if session.favorite {
+                            Image(systemName: "star.fill")
+                                .foregroundColor(.yellow)
+                                .font(.system(size: 14))
+                        }
+                        Text(session.name)
+                            .font(.system(size: 20, weight: .semibold))
+                    }
                 // Feature indicators as simple icons in a row
                 HStack(spacing: 15) {
                     if session.stepSize > 1 {

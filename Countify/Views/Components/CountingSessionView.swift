@@ -341,9 +341,9 @@ struct BaseActionSheet<Content: View>: View {
                 }
             
             VStack(spacing: 0) {
-                // Drag indicator
+                // Drag indicator - Instagram style
                 RoundedRectangle(cornerRadius: 2.5)
-                    .fill(Color.secondary.opacity(0.5))
+                    .fill(Color.gray.opacity(0.5))
                     .frame(width: 40, height: 5)
                     .padding(.top, 12)
                     .padding(.bottom, 12)
@@ -359,9 +359,17 @@ struct BaseActionSheet<Content: View>: View {
             }
             .padding(.horizontal, 16)
             .background(
-                RoundedRectangle(cornerRadius: 24)
-                    .fill(Color(.systemGray6))
+                ZStack {
+                    // Instagram-style background
+                    RoundedRectangle(cornerRadius: 24)
+                        .fill(Color(.systemBackground).opacity(0.98))
+                    
+                    // Simple edge stroke - Instagram style
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(Color.gray.opacity(0.15), lineWidth: 0.5)
+                }
             )
+            .shadow(color: Color.black.opacity(0.1), radius: 6, x: 0, y: 2)
             .offset(y: max(0, dragOffset.height) + offset)
             .gesture(
                 DragGesture()
@@ -400,7 +408,6 @@ struct BaseActionSheet<Content: View>: View {
 }
 
 
-
 // MARK: - StepSizeSheet
 struct StepSizeSheet: View {
     @Binding var session: CountSession
@@ -409,12 +416,6 @@ struct StepSizeSheet: View {
     @State private var stepSize: Int
     @State private var stepSizeString: String
     @FocusState private var isTextFieldFocused: Bool
-    
-    // States for handling long press
-    @State private var isLongPressingIncrement = false
-    @State private var isLongPressingDecrement = false
-    @State private var changeRate = 1  // Will increase over time for faster scrolling
-    @State private var longPressTimer: Timer?
     
     init(session: Binding<CountSession>, sessionManager: CountSessionManager, isPresented: Binding<Bool>) {
         self._session = session
@@ -427,17 +428,31 @@ struct StepSizeSheet: View {
     var body: some View {
         ModernActionSheet(isPresented: $isPresented, title: "Step Size") {
             VStack(spacing: 16) {
-                // Direct text input for step size
-                HStack {
-                    Text("Step Value:")
-                        .font(.system(size: 16, weight: .medium))
+                // Combined input with stepper buttons
+                HStack(spacing: 20) {
+                    // Decrement button - made larger
+                    Button(action: {
+                        if stepSize > 1 {
+                            stepSize -= 1
+                            stepSizeString = "\(stepSize)"
+                            hapticFeedback()
+                        }
+                    }) {
+                        Image(systemName: "minus")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(stepSize > 1 ? .primary : .gray)
+                            .frame(width: 48, height: 48)
+                            .background(
+                                Circle()
+                                    .fill(Color.primary.opacity(0.05))
+                            )
+                    }
+                    .disabled(stepSize <= 1)
                     
-                    Spacer()
-                    
-                    // Text field allows direct entry of numbers
+                    // Text field centered between buttons
                     TextField("1-100", text: $stepSizeString)
                         .keyboardType(.numberPad)
-                        .multilineTextAlignment(.trailing)
+                        .multilineTextAlignment(.center)
                         .font(.system(size: 18, weight: .semibold, design: .rounded))
                         .frame(width: 80)
                         .padding(8)
@@ -463,156 +478,38 @@ struct StepSizeSheet: View {
                                 stepSizeString = "\(stepSize)"
                             }
                         }
-                }
-                .padding(.horizontal, 20)
-                
-                // Mini stepper buttons with long press functionality
-                HStack {
-                    // Decrement button with long press
-                    Button(action: {
-                        // Single tap action
-                        decrementStepSize()
-                    }) {
-                        Image(systemName: "minus")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(stepSize > 1 ? .primary : .gray)
-                            .frame(width: 32, height: 32)
-                            .background(
-                                Circle()
-                                    .fill(isLongPressingDecrement ? Color.primary.opacity(0.1) : Color.primary.opacity(0.05))
-                            )
-                            .scaleEffect(isLongPressingDecrement ? 0.9 : 1.0)
-                    }
-                    .disabled(stepSize <= 1)
-                    // Long press gesture
-                    .simultaneousGesture(
-                        LongPressGesture(minimumDuration: 0.5)
-                            .onEnded { _ in
-                                // Start long press
-                                isLongPressingDecrement = true
-                                startDecrementTimer()
-                                hapticFeedback()
-                            }
-                    )
-                    // Detect when press ends
-                    .simultaneousGesture(
-                        DragGesture(minimumDistance: 0)
-                            .onEnded { _ in
-                                if isLongPressingDecrement {
-                                    stopTimers()
-                                }
-                            }
-                    )
                     
-                    Spacer()
-                    
-                    // Increment button with long press
+                    // Increment button - made larger
                     Button(action: {
-                        // Single tap action
-                        incrementStepSize()
+                        if stepSize < 100 {
+                            stepSize += 1
+                            stepSizeString = "\(stepSize)"
+                            hapticFeedback()
+                        }
                     }) {
                         Image(systemName: "plus")
-                            .font(.system(size: 12, weight: .bold))
+                            .font(.system(size: 16, weight: .bold))
                             .foregroundColor(stepSize < 100 ? .primary : .gray)
-                            .frame(width: 32, height: 32)
+                            .frame(width: 48, height: 48)
                             .background(
                                 Circle()
-                                    .fill(isLongPressingIncrement ? Color.primary.opacity(0.1) : Color.primary.opacity(0.05))
+                                    .fill(Color.primary.opacity(0.05))
                             )
-                            .scaleEffect(isLongPressingIncrement ? 0.9 : 1.0)
                     }
                     .disabled(stepSize >= 100)
-                    // Long press gesture
-                    .simultaneousGesture(
-                        LongPressGesture(minimumDuration: 0.5)
-                            .onEnded { _ in
-                                // Start long press
-                                isLongPressingIncrement = true
-                                startIncrementTimer()
-                                hapticFeedback()
-                            }
-                    )
-                    // Detect when press ends
-                    .simultaneousGesture(
-                        DragGesture(minimumDistance: 0)
-                            .onEnded { _ in
-                                if isLongPressingIncrement {
-                                    stopTimers()
-                                }
-                            }
-                    )
                 }
-                .padding(.horizontal, 40)
-                .animation(.easeInOut(duration: 0.2), value: isLongPressingDecrement)
-                .animation(.easeInOut(duration: 0.2), value: isLongPressingIncrement)
-                
-                Divider()
-                    .padding(.vertical, 4)
-                
-                // Common values - more compact layout
-                Text("Common Values")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 20)
-                
-                // Common values in grid layout to save space
-                LazyVGrid(columns: [
-                    GridItem(.flexible()),
-                    GridItem(.flexible()),
-                    GridItem(.flexible()),
-                    GridItem(.flexible())
-                ], spacing: 10) {
-                    ForEach([1, 5, 10, 25, 50, 75, 100], id: \.self) { value in
-                        Button(action: {
-                            stepSize = value
-                            stepSizeString = "\(value)"
-                            hapticFeedback()
-                        }) {
-                            Text("\(value)")
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(stepSize == value ? .white : .primary)
-                                .frame(height: 36)
-                                .frame(maxWidth: .infinity)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(stepSize == value ? Color.blue : Color.primary.opacity(0.05))
-                                )
-                        }
-                    }
-                }
-                .padding(.horizontal, 20)
-                
-                // Save Button
-                ModernActionButton(text: "Save", action: {
-                    // Ensure value is valid before saving
-                    if let value = Int(stepSizeString), value >= 1, value <= 100 {
-                        stepSize = value
-                    } else {
-                        stepSize = max(1, min(100, stepSize))
-                        stepSizeString = "\(stepSize)"
-                    }
-                    
-                    saveStepSize()
-                    isTextFieldFocused = false
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                        isPresented = false
-                    }
-                })
-                .padding(.top, 16)
+                .frame(maxWidth: .infinity)
                 .padding(.horizontal, 20)
             }
-            .padding(.vertical, 20)
-            // Dismiss keyboard when tapping outside the text field
+            .padding(.vertical, 16)
+            .onDisappear {
+                saveStepSize()
+            }
             .onTapGesture {
+                // Dismiss keyboard when tapping outside
                 isTextFieldFocused = false
             }
-            // Make sure to cancel timers when view disappears
-            .onDisappear {
-                stopTimers()
-            }
         }
-        // Add toolbar with Done button for numeric keyboard
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
@@ -623,96 +520,19 @@ struct StepSizeSheet: View {
         }
     }
     
-    // MARK: - Timer Functions for Continuous Change
-    
-    private func startIncrementTimer() {
-        // Cancel any existing timer
-        longPressTimer?.invalidate()
-        
-        // Reset change rate
-        changeRate = 1
-        
-        // Create a new timer that fires repeatedly
-        longPressTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
-            incrementStepSize()
-            
-            // Increase change rate over time
-            if timer.timeInterval > 1.0 {
-                changeRate = min(changeRate + 1, 5)
-            }
-        }
-    }
-    
-    private func startDecrementTimer() {
-        // Cancel any existing timer
-        longPressTimer?.invalidate()
-        
-        // Reset change rate
-        changeRate = 1
-        
-        // Create a new timer that fires repeatedly
-        longPressTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
-            decrementStepSize()
-            
-            // Increase change rate over time
-            if timer.timeInterval > 1.0 {
-                changeRate = min(changeRate + 1, 5)
-            }
-        }
-    }
-    
-    private func stopTimers() {
-        longPressTimer?.invalidate()
-        longPressTimer = nil
-        isLongPressingIncrement = false
-        isLongPressingDecrement = false
-        changeRate = 1
-    }
-    
-    // MARK: - Value Change Functions
-    
-    private func incrementStepSize() {
-        if stepSize < 100 {
-            // Apply change rate for faster scrolling
-            stepSize = min(100, stepSize + changeRate)
-            stepSizeString = "\(stepSize)"
-            
-            // Lighter haptic for continuous change
-            if session.hapticEnabled && changeRate == 1 {
-                let generator = UIImpactFeedbackGenerator(style: .light)
-                generator.impactOccurred(intensity: 0.3)
-            }
-        } else {
-            stopTimers()
-        }
-    }
-    
-    private func decrementStepSize() {
-        if stepSize > 1 {
-            // Apply change rate for faster scrolling
-            stepSize = max(1, stepSize - changeRate)
-            stepSizeString = "\(stepSize)"
-            
-            // Lighter haptic for continuous change
-            if session.hapticEnabled && changeRate == 1 {
-                let generator = UIImpactFeedbackGenerator(style: .light)
-                generator.impactOccurred(intensity: 0.3)
-            }
-        } else {
-            stopTimers()
-        }
-    }
-    
     private func saveStepSize() {
-        var updatedSession = session
-        updatedSession.stepSize = stepSize
-        session = updatedSession
-        sessionManager.saveSession(updatedSession)
-        
-        if session.hapticEnabled {
-            let generator = UINotificationFeedbackGenerator()
-            generator.prepare()
-            generator.notificationOccurred(.success)
+        // Only save and trigger haptic feedback if the value actually changed
+        if session.stepSize != stepSize {
+            var updatedSession = session
+            updatedSession.stepSize = stepSize
+            session = updatedSession
+            sessionManager.saveSession(updatedSession)
+            
+            if session.hapticEnabled {
+                let generator = UINotificationFeedbackGenerator()
+                generator.prepare()
+                generator.notificationOccurred(.success)
+            }
         }
     }
     
@@ -724,7 +544,7 @@ struct StepSizeSheet: View {
     }
 }
 
-// MARK: - LimitsSheet
+// MARK: - LimitsSheet (Simplified)
 struct LimitsSheet: View {
     @Binding var session: CountSession
     let sessionManager: CountSessionManager
@@ -736,14 +556,6 @@ struct LimitsSheet: View {
     @State private var lowerLimit: Int
     @State private var upperLimitString: String
     @State private var lowerLimitString: String
-    
-    // States for handling long press
-    @State private var isLongPressingUpperIncrement = false
-    @State private var isLongPressingUpperDecrement = false
-    @State private var isLongPressingLowerIncrement = false
-    @State private var isLongPressingLowerDecrement = false
-    @State private var changeRate = 1  // Will increase over time for faster scrolling
-    @State private var longPressTimer: Timer?
     
     // Focus states for text fields
     @FocusState private var isUpperLimitFocused: Bool
@@ -770,41 +582,21 @@ struct LimitsSheet: View {
                     ModernToggle(title: "Upper Limit", isOn: $enableUpperLimit)
                     
                     if enableUpperLimit {
-                        // Direct text input with continuous stepper buttons
-                        HStack {
-                            // Decrement button
+                        // Direct text input with simple stepper buttons
+                        HStack(spacing: 12) {
                             Button(action: {
                                 decrementUpperLimit()
                             }) {
                                 Image(systemName: "minus")
                                     .font(.system(size: 12, weight: .bold))
                                     .foregroundColor(.primary)
-                                    .frame(width: 32, height: 32)
+                                    .frame(width: 36, height: 36)
                                     .background(
                                         Circle()
-                                            .fill(isLongPressingUpperDecrement ? Color.orange.opacity(0.2) : Color.orange.opacity(0.1))
+                                            .fill(Color.orange.opacity(0.1))
                                     )
-                                    .scaleEffect(isLongPressingUpperDecrement ? 0.9 : 1.0)
                             }
                             .disabled(!enableUpperLimit)
-                            // Long press gesture
-                            .simultaneousGesture(
-                                LongPressGesture(minimumDuration: 0.5)
-                                    .onEnded { _ in
-                                        isLongPressingUpperDecrement = true
-                                        startUpperDecrementTimer()
-                                        hapticFeedback()
-                                    }
-                            )
-                            // Detect when press ends
-                            .simultaneousGesture(
-                                DragGesture(minimumDistance: 0)
-                                    .onEnded { _ in
-                                        if isLongPressingUpperDecrement {
-                                            stopTimers()
-                                        }
-                                    }
-                            )
                             
                             Spacer()
                             
@@ -844,55 +636,21 @@ struct LimitsSheet: View {
                             
                             Spacer()
                             
-                            // Increment button
                             Button(action: {
                                 incrementUpperLimit()
                             }) {
                                 Image(systemName: "plus")
                                     .font(.system(size: 12, weight: .bold))
                                     .foregroundColor(.primary)
-                                    .frame(width: 32, height: 32)
+                                    .frame(width: 36, height: 36)
                                     .background(
                                         Circle()
-                                            .fill(isLongPressingUpperIncrement ? Color.orange.opacity(0.2) : Color.orange.opacity(0.1))
+                                            .fill(Color.orange.opacity(0.1))
                                     )
-                                    .scaleEffect(isLongPressingUpperIncrement ? 0.9 : 1.0)
                             }
                             .disabled(!enableUpperLimit)
-                            // Long press gesture
-                            .simultaneousGesture(
-                                LongPressGesture(minimumDuration: 0.5)
-                                    .onEnded { _ in
-                                        isLongPressingUpperIncrement = true
-                                        startUpperIncrementTimer()
-                                        hapticFeedback()
-                                    }
-                            )
-                            // Detect when press ends
-                            .simultaneousGesture(
-                                DragGesture(minimumDistance: 0)
-                                    .onEnded { _ in
-                                        if isLongPressingUpperIncrement {
-                                            stopTimers()
-                                        }
-                                    }
-                            )
                         }
                         .padding(.vertical, 6)
-                        .animation(.easeInOut(duration: 0.2), value: isLongPressingUpperDecrement)
-                        .animation(.easeInOut(duration: 0.2), value: isLongPressingUpperIncrement)
-                        
-                        // Visual indicator for the upper limit
-                        ZStack(alignment: .leading) {
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.orange.opacity(0.1))
-                                .frame(height: 6)
-                            
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.orange)
-                                .frame(width: 200 * (min(CGFloat(upperLimit), 1000) / 1000), height: 6)
-                        }
-                        .padding(.top, 4)
                     }
                 }
                 .padding(.horizontal, 20)
@@ -905,41 +663,21 @@ struct LimitsSheet: View {
                     ModernToggle(title: "Lower Limit", isOn: $enableLowerLimit)
                     
                     if enableLowerLimit {
-                        // Direct text input with continuous stepper buttons
-                        HStack {
-                            // Decrement button
+                        // Direct text input with simple stepper buttons
+                        HStack(spacing: 12) {
                             Button(action: {
                                 decrementLowerLimit()
                             }) {
                                 Image(systemName: "minus")
                                     .font(.system(size: 12, weight: .bold))
                                     .foregroundColor(.primary)
-                                    .frame(width: 32, height: 32)
+                                    .frame(width: 36, height: 36)
                                     .background(
                                         Circle()
-                                            .fill(isLongPressingLowerDecrement ? Color.orange.opacity(0.2) : Color.orange.opacity(0.1))
+                                            .fill(Color.orange.opacity(0.1))
                                     )
-                                    .scaleEffect(isLongPressingLowerDecrement ? 0.9 : 1.0)
                             }
                             .disabled(!enableLowerLimit || (!session.allowNegatives && lowerLimit <= 0))
-                            // Long press gesture
-                            .simultaneousGesture(
-                                LongPressGesture(minimumDuration: 0.5)
-                                    .onEnded { _ in
-                                        isLongPressingLowerDecrement = true
-                                        startLowerDecrementTimer()
-                                        hapticFeedback()
-                                    }
-                            )
-                            // Detect when press ends
-                            .simultaneousGesture(
-                                DragGesture(minimumDistance: 0)
-                                    .onEnded { _ in
-                                        if isLongPressingLowerDecrement {
-                                            stopTimers()
-                                        }
-                                    }
-                            )
                             
                             Spacer()
                             
@@ -995,178 +733,33 @@ struct LimitsSheet: View {
                             
                             Spacer()
                             
-                            // Increment button
                             Button(action: {
                                 incrementLowerLimit()
                             }) {
                                 Image(systemName: "plus")
                                     .font(.system(size: 12, weight: .bold))
                                     .foregroundColor(.primary)
-                                    .frame(width: 32, height: 32)
+                                    .frame(width: 36, height: 36)
                                     .background(
                                         Circle()
-                                            .fill(isLongPressingLowerIncrement ? Color.orange.opacity(0.2) : Color.orange.opacity(0.1))
+                                            .fill(Color.orange.opacity(0.1))
                                     )
-                                    .scaleEffect(isLongPressingLowerIncrement ? 0.9 : 1.0)
                             }
                             .disabled(!enableLowerLimit)
-                            // Long press gesture
-                            .simultaneousGesture(
-                                LongPressGesture(minimumDuration: 0.5)
-                                    .onEnded { _ in
-                                        isLongPressingLowerIncrement = true
-                                        startLowerIncrementTimer()
-                                        hapticFeedback()
-                                    }
-                            )
-                            // Detect when press ends
-                            .simultaneousGesture(
-                                DragGesture(minimumDistance: 0)
-                                    .onEnded { _ in
-                                        if isLongPressingLowerIncrement {
-                                            stopTimers()
-                                        }
-                                    }
-                            )
                         }
                         .padding(.vertical, 6)
-                        .animation(.easeInOut(duration: 0.2), value: isLongPressingLowerDecrement)
-                        .animation(.easeInOut(duration: 0.2), value: isLongPressingLowerIncrement)
-                        
-                        // Visual indicator for the lower limit
-                        ZStack(alignment: .leading) {
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.orange.opacity(0.1))
-                                .frame(height: 6)
-                            
-                            let normalizedValue = CGFloat(lowerLimit + 10000) / 20000
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.orange)
-                                .frame(width: 200 * normalizedValue, height: 6)
-                        }
-                        .padding(.top, 4)
                     }
                 }
                 .padding(.horizontal, 20)
-                
-                // Visual representation of range when both limits are enabled
-                if enableUpperLimit && enableLowerLimit {
-                    VStack(spacing: 6) {
-                        Text("Valid Range")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
-                        
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color.orange.opacity(0.15))
-                                .frame(height: 60)
-                            
-                            HStack(spacing: 0) {
-                                Text("\(lowerLimit)")
-                                    .font(.system(size: 15, weight: .semibold))
-                                    .padding(.leading, 16)
-                                
-                                Spacer()
-                                
-                                Text("\(upperLimit)")
-                                    .font(.system(size: 15, weight: .semibold))
-                                    .padding(.trailing, 16)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 8)
-                }
-                
-                // Common presets for quick selection
-                if enableUpperLimit || enableLowerLimit {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Common Presets")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal, 20)
-                        
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 10) {
-                                // Common upper limit presets
-                                if enableUpperLimit {
-                                    Group {
-                                        limitPresetButton(value: 10, isSelected: upperLimit == 10, action: {
-                                            upperLimit = 10
-                                            upperLimitString = "10"
-                                        })
-                                        
-                                        limitPresetButton(value: 50, isSelected: upperLimit == 50, action: {
-                                            upperLimit = 50
-                                            upperLimitString = "50"
-                                        })
-                                        
-                                        limitPresetButton(value: 100, isSelected: upperLimit == 100, action: {
-                                            upperLimit = 100
-                                            upperLimitString = "100"
-                                        })
-                                        
-                                        limitPresetButton(value: 1000, isSelected: upperLimit == 1000, action: {
-                                            upperLimit = 1000
-                                            upperLimitString = "1000"
-                                        })
-                                    }
-                                }
-                                
-                                // Common lower limit presets
-                                if enableLowerLimit {
-                                    Group {
-                                        limitPresetButton(value: 0, isSelected: lowerLimit == 0, action: {
-                                            lowerLimit = 0
-                                            lowerLimitString = "0"
-                                        })
-                                        
-                                        limitPresetButton(value: 1, isSelected: lowerLimit == 1, action: {
-                                            lowerLimit = 1
-                                            lowerLimitString = "1"
-                                        })
-                                        
-                                        limitPresetButton(value: 10, isSelected: lowerLimit == 10, action: {
-                                            lowerLimit = 10
-                                            lowerLimitString = "10"
-                                        })
-                                        
-                                        // Only show negative presets if negatives are allowed
-                                        if session.allowNegatives {
-                                            limitPresetButton(value: -10, isSelected: lowerLimit == -10, action: {
-                                                lowerLimit = -10
-                                                lowerLimitString = "-10"
-                                            })
-                                        }
-                                    }
-                                }
-                            }
-                            .padding(.horizontal, 20)
-                        }
-                    }
-                    .padding(.top, 10)
-                }
-                
-                // Save Button
-                ModernActionButton(text: "Save", action: {
-                    saveLimits()
-                    // Clear focus from text fields
-                    isUpperLimitFocused = false
-                    isLowerLimitFocused = false
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                        isPresented = false
-                    }
-                })
-                .padding(.top, 20)
-                .padding(.horizontal, 20)
+            }
+            .padding(.vertical, 16)
+            .onDisappear {
+                saveLimits()
             }
             .onTapGesture {
                 // Dismiss keyboard when tapping outside
                 isUpperLimitFocused = false
                 isLowerLimitFocused = false
-            }
-            .onDisappear {
-                stopTimers()
             }
         }
         .toolbar {
@@ -1180,102 +773,10 @@ struct LimitsSheet: View {
         }
     }
     
-    // MARK: - Custom Components
-    
-    private func limitPresetButton(value: Int, isSelected: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: {
-            action()
-            hapticFeedback()
-        }) {
-            Text("\(value)")
-                .font(.system(size: 15, weight: .medium))
-                .foregroundColor(isSelected ? .white : .primary)
-                .frame(height: 36)
-                .frame(minWidth: 60)
-                .padding(.horizontal, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(isSelected ? Color.orange : Color.primary.opacity(0.05))
-                )
-        }
-    }
-    
-    // MARK: - Timer Functions for Continuous Change
-    
-    // Upper limit increment timer
-    private func startUpperIncrementTimer() {
-        longPressTimer?.invalidate()
-        changeRate = 1
-        
-        longPressTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
-            incrementUpperLimit()
-            
-            // Increase change rate over time
-            if timer.timeInterval > 0.5 {
-                changeRate = min(changeRate + 1, 10)
-            }
-        }
-    }
-    
-    // Upper limit decrement timer
-    private func startUpperDecrementTimer() {
-        longPressTimer?.invalidate()
-        changeRate = 1
-        
-        longPressTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
-            decrementUpperLimit()
-            
-            // Increase change rate over time
-            if timer.timeInterval > 0.5 {
-                changeRate = min(changeRate + 1, 10)
-            }
-        }
-    }
-    
-    // Lower limit increment timer
-    private func startLowerIncrementTimer() {
-        longPressTimer?.invalidate()
-        changeRate = 1
-        
-        longPressTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
-            incrementLowerLimit()
-            
-            // Increase change rate over time
-            if timer.timeInterval > 0.5 {
-                changeRate = min(changeRate + 1, 10)
-            }
-        }
-    }
-    
-    // Lower limit decrement timer
-    private func startLowerDecrementTimer() {
-        longPressTimer?.invalidate()
-        changeRate = 1
-        
-        longPressTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
-            decrementLowerLimit()
-            
-            // Increase change rate over time
-            if timer.timeInterval > 0.5 {
-                changeRate = min(changeRate + 1, 10)
-            }
-        }
-    }
-    
-    private func stopTimers() {
-        longPressTimer?.invalidate()
-        longPressTimer = nil
-        isLongPressingUpperIncrement = false
-        isLongPressingUpperDecrement = false
-        isLongPressingLowerIncrement = false
-        isLongPressingLowerDecrement = false
-        changeRate = 1
-    }
-    
     // MARK: - Value Change Functions
     
     private func incrementUpperLimit() {
-        upperLimit += changeRate
+        upperLimit += 1
         upperLimitString = "\(upperLimit)"
         
         // Ensure lower limit stays below upper limit
@@ -1284,11 +785,7 @@ struct LimitsSheet: View {
             lowerLimitString = "\(lowerLimit)"
         }
         
-        // Lighter haptic for continuous change
-        if session.hapticEnabled && changeRate == 1 {
-            let generator = UIImpactFeedbackGenerator(style: .light)
-            generator.impactOccurred(intensity: 0.3)
-        }
+        hapticFeedback()
     }
     
     private func decrementUpperLimit() {
@@ -1296,15 +793,10 @@ struct LimitsSheet: View {
         let minValue = enableLowerLimit ? lowerLimit + session.stepSize : session.stepSize
         
         if upperLimit > minValue {
-            upperLimit -= changeRate
+            upperLimit -= 1
             upperLimit = max(minValue, upperLimit)
             upperLimitString = "\(upperLimit)"
-            
-            // Lighter haptic for continuous change
-            if session.hapticEnabled && changeRate == 1 {
-                let generator = UIImpactFeedbackGenerator(style: .light)
-                generator.impactOccurred(intensity: 0.3)
-            }
+            hapticFeedback()
         }
     }
     
@@ -1313,66 +805,59 @@ struct LimitsSheet: View {
         let maxValue = enableUpperLimit ? upperLimit - session.stepSize : Int.max
         
         if lowerLimit < maxValue {
-            lowerLimit += changeRate
+            lowerLimit += 1
             lowerLimit = min(maxValue, lowerLimit)
             lowerLimitString = "\(lowerLimit)"
-            
-            // Lighter haptic for continuous change
-            if session.hapticEnabled && changeRate == 1 {
-                let generator = UIImpactFeedbackGenerator(style: .light)
-                generator.impactOccurred(intensity: 0.3)
-            }
+            hapticFeedback()
         }
     }
     
     private func decrementLowerLimit() {
         // Don't allow going below 0 if negatives are not allowed
-        if !session.allowNegatives && lowerLimit - changeRate < 0 {
-            lowerLimit = 0
-            lowerLimitString = "0"
-            stopTimers()
+        if !session.allowNegatives && lowerLimit - 1 < 0 {
             return
         }
         
-        lowerLimit -= changeRate
+        lowerLimit -= 1
         lowerLimitString = "\(lowerLimit)"
-        
-        // Lighter haptic for continuous change
-        if session.hapticEnabled && changeRate == 1 {
-            let generator = UIImpactFeedbackGenerator(style: .light)
-            generator.impactOccurred(intensity: 0.3)
-        }
+        hapticFeedback()
     }
     
     private func saveLimits() {
-        // Validate and convert text input to integers
+        // Get final values from inputs
         let finalUpperLimit = enableUpperLimit ? (Int(upperLimitString) ?? upperLimit) : nil
         let finalLowerLimit = enableLowerLimit ? (Int(lowerLimitString) ?? lowerLimit) : nil
         
-        var updatedSession = session
+        // Check if there are actual changes to save
+        let limitsChanged = (finalUpperLimit != session.upperLimit) ||
+                            (finalLowerLimit != session.lowerLimit)
         
-        // If negatives aren't allowed, ensure lower limit is non-negative
-        if !session.allowNegatives && finalLowerLimit != nil && finalLowerLimit! < 0 {
-            updatedSession.lowerLimit = 0
-        } else {
-            updatedSession.lowerLimit = finalLowerLimit
-        }
-        
-        updatedSession.upperLimit = finalUpperLimit
-        
-        // Adjust count if needed to respect the new limits
-        if let lowerLimit = updatedSession.lowerLimit, updatedSession.count < lowerLimit {
-            updatedSession.count = lowerLimit
-        } else if let upperLimit = finalUpperLimit, updatedSession.count > upperLimit {
-            updatedSession.count = upperLimit
-        }
-        
-        session = updatedSession
-        sessionManager.saveSession(updatedSession)
-        
-        if session.hapticEnabled {
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.success)
+        if limitsChanged {
+            var updatedSession = session
+            
+            // If negatives aren't allowed, ensure lower limit is non-negative
+            if !session.allowNegatives && finalLowerLimit != nil && finalLowerLimit! < 0 {
+                updatedSession.lowerLimit = 0
+            } else {
+                updatedSession.lowerLimit = finalLowerLimit
+            }
+            
+            updatedSession.upperLimit = finalUpperLimit
+            
+            // Adjust count if needed to respect the new limits
+            if let lowerLimit = updatedSession.lowerLimit, updatedSession.count < lowerLimit {
+                updatedSession.count = lowerLimit
+            } else if let upperLimit = finalUpperLimit, updatedSession.count > upperLimit {
+                updatedSession.count = upperLimit
+            }
+            
+            session = updatedSession
+            sessionManager.saveSession(updatedSession)
+            
+            if session.hapticEnabled {
+                let generator = UINotificationFeedbackGenerator()
+                generator.notificationOccurred(.success)
+            }
         }
     }
     
@@ -1384,7 +869,7 @@ struct LimitsSheet: View {
     }
 }
 
-// MARK: - NegativesSheet
+// MARK: - NegativesSheet (Simplified)
 struct NegativesSheet: View {
     @Binding var session: CountSession
     let sessionManager: CountSessionManager
@@ -1409,146 +894,49 @@ struct NegativesSheet: View {
                         .font(.system(size: 14))
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
                 }
-                .padding(.horizontal, 20)
-                
-                // Interactive comparison example
-                HStack(spacing: 16) {
-                    // Without negatives example
-                    VStack(spacing: 6) {
-                        Text("Without Negatives")
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                        
-                        // Counter display
-                        VStack(spacing: 4) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 10)
-                                    .fill(!allowNegatives ? Color.blue.opacity(0.1) : Color.gray.opacity(0.1))
-                                    .frame(height: 40)
-                                
-                                Text("0")
-                                    .font(.system(size: 20, weight: .medium, design: .rounded))
-                                    .foregroundColor(!allowNegatives ? .primary : .secondary)
-                            }
-                            
-                            // Disabled minus button visualization
-                            HStack {
-                                Image(systemName: "minus.circle.fill")
-                                    .foregroundColor(.gray)
-                                    .font(.system(size: 18))
-                                
-                                Text("Disabled")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.gray)
-                            }
-                            .padding(.top, 2)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 6)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(!allowNegatives ? Color.primary.opacity(0.03) : Color.clear)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .strokeBorder(!allowNegatives ? Color.blue.opacity(0.2) : Color.clear, lineWidth: 1)
-                    )
-                    
-                    // With negatives example
-                    VStack(spacing: 6) {
-                        Text("With Negatives")
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                        
-                        // Counter display
-                        VStack(spacing: 4) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 10)
-                                    .fill(allowNegatives ? Color.purple.opacity(0.1) : Color.gray.opacity(0.1))
-                                    .frame(height: 40)
-                                
-                                HStack(spacing: 2) {
-                                    Text("-5")
-                                        .font(.system(size: 20, weight: .medium, design: .rounded))
-                                }
-                                .foregroundColor(allowNegatives ? .primary : .secondary)
-                            }
-                            
-                            // Active minus button visualization
-                            HStack {
-                                Image(systemName: "minus.circle.fill")
-                                    .foregroundColor(allowNegatives ? .purple : .gray)
-                                    .font(.system(size: 18))
-                                
-                                Text("Active")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(allowNegatives ? .purple : .gray)
-                            }
-                            .padding(.top, 2)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 6)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(allowNegatives ? Color.primary.opacity(0.03) : Color.clear)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .strokeBorder(allowNegatives ? Color.purple.opacity(0.2) : Color.clear, lineWidth: 1)
-                    )
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 4)
-                
-                // Save Button
-                ModernActionButton(text: "Save", action: {
-                    saveNegatives()
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                        isPresented = false
-                    }
-                })
-                .padding(.top, 12)
                 .padding(.horizontal, 20)
             }
             .padding(.vertical, 16)
+            .onDisappear {
+                saveNegatives()
+            }
         }
     }
     
     private func saveNegatives() {
-        var updatedSession = session
-        updatedSession.allowNegatives = allowNegatives
-        
-        // If negatives are disabled and a lower limit is set, update the lower limit
-        if !allowNegatives && updatedSession.lowerLimit != nil && updatedSession.lowerLimit! < 0 {
-            updatedSession.lowerLimit = 0
-        }
-        
-        // If negatives are disabled and count is negative, adjust count to 0 or lower limit
-        if !allowNegatives && updatedSession.count < 0 {
-            if let lowerLimit = updatedSession.lowerLimit, lowerLimit >= 0 {
-                updatedSession.count = lowerLimit
-            } else {
-                updatedSession.count = 0
+        // Only save and provide feedback if the setting changed
+        if session.allowNegatives != allowNegatives {
+            var updatedSession = session
+            updatedSession.allowNegatives = allowNegatives
+            
+            // If negatives are disabled and a lower limit is set, update the lower limit
+            if !allowNegatives && updatedSession.lowerLimit != nil && updatedSession.lowerLimit! < 0 {
+                updatedSession.lowerLimit = 0
             }
-        }
-        
-        session = updatedSession
-        sessionManager.saveSession(updatedSession)
-        
-        if session.hapticEnabled {
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.success)
+            
+            // If negatives are disabled and count is negative, adjust count to 0 or lower limit
+            if !allowNegatives && updatedSession.count < 0 {
+                if let lowerLimit = updatedSession.lowerLimit, lowerLimit >= 0 {
+                    updatedSession.count = lowerLimit
+                } else {
+                    updatedSession.count = 0
+                }
+            }
+            
+            session = updatedSession
+            sessionManager.saveSession(updatedSession)
+            
+            if session.hapticEnabled {
+                let generator = UINotificationFeedbackGenerator()
+                generator.notificationOccurred(.success)
+            }
         }
     }
 }
-// MARK: - HapticsSheet
+
+// MARK: - HapticsSheet (Simplified)
 struct HapticsSheet: View {
     @Binding var session: CountSession
     let sessionManager: CountSessionManager
@@ -1564,130 +952,44 @@ struct HapticsSheet: View {
     
     var body: some View {
         ModernActionSheet(isPresented: $isPresented, title: "Haptic Feedback") {
-            VStack(spacing: 30) {
+            VStack(spacing: 16) {
                 // Toggle with description
-                VStack(spacing: 16) {
+                VStack(spacing: 8) {
                     ModernToggle(title: "Enable Haptic Feedback", isOn: $hapticEnabled)
                     
                     Text("When enabled, you'll feel vibration patterns when incrementing, decrementing, or resetting the counter")
                         .font(.system(size: 14))
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal, 20)
-                }
-                
-                // Illustrated guide with improved visuals
-                VStack(spacing: 16) {
-                    Text("Different Actions, Different Feels")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.primary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    HStack(spacing: 20) {
-                        FeedbackTypeCard(
-                            icon: "arrow.up",
-                            title: "Increment",
-                            description: "Single tap",
-                            color: .green,
-                            isEnabled: hapticEnabled
-                        )
-                        
-                        FeedbackTypeCard(
-                            icon: "arrow.down",
-                            title: "Decrement",
-                            description: "Double tap",
-                            color: .red,
-                            isEnabled: hapticEnabled
-                        )
-                    }
+                        .frame(maxWidth: .infinity)
                 }
                 .padding(.horizontal, 20)
-                
-                // Haptic test buttons
-                VStack(spacing: 10) {
-                    Text("Test Haptics")
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.secondary)
-                    
-                    HStack(spacing: 30) {
-                        Button(action: {
-                            if hapticEnabled {
-                                HapticManager.shared.playHaptic(style: .increment)
-                            }
-                        }) {
-                            VStack(spacing: 8) {
-                                ZStack {
-                                    Circle()
-                                        .fill(hapticEnabled ? Color.green.opacity(0.15) : Color.gray.opacity(0.1))
-                                        .frame(width: 60, height: 60)
-                                    
-                                    Image(systemName: "plus.circle.fill")
-                                        .font(.system(size: 28))
-                                        .foregroundColor(hapticEnabled ? .green : .gray)
-                                }
-                                
-                                Text("Increment")
-                                    .font(.caption)
-                            }
-                        }
-                        .buttonStyle(SpringActionButtonStyle())
-                        .disabled(!hapticEnabled)
-                        
-                        Button(action: {
-                            if hapticEnabled {
-                                HapticManager.shared.playHaptic(style: .decrement)
-                            }
-                        }) {
-                            VStack(spacing: 8) {
-                                ZStack {
-                                    Circle()
-                                        .fill(hapticEnabled ? Color.red.opacity(0.15) : Color.gray.opacity(0.1))
-                                        .frame(width: 60, height: 60)
-                                    
-                                    Image(systemName: "minus.circle.fill")
-                                        .font(.system(size: 28))
-                                        .foregroundColor(hapticEnabled ? .red : .gray)
-                                }
-                                
-                                Text("Decrement")
-                                    .font(.caption)
-                            }
-                        }
-                        .buttonStyle(SpringActionButtonStyle())
-                        .disabled(!hapticEnabled)
-                    }
-                }
-                .padding(.vertical, 8)
-                
-                // Save Button
-                ModernActionButton(text: "Save", action: {
-                    saveHaptics()
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                        isPresented = false
-                    }
-                })
-                .padding(.horizontal, 20)
-                .padding(.top, 20)
             }
-            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .onDisappear {
+                saveHaptics()
+            }
         }
     }
     
     private func saveHaptics() {
-        var updatedSession = session
-        updatedSession.hapticEnabled = hapticEnabled
-        session = updatedSession
-        sessionManager.saveSession(updatedSession)
-        
-        if hapticEnabled {
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.success)
+        // Only save and provide feedback if the setting changed
+        if session.hapticEnabled != hapticEnabled {
+            var updatedSession = session
+            updatedSession.hapticEnabled = hapticEnabled
+            session = updatedSession
+            sessionManager.saveSession(updatedSession)
+            
+            // Only provide haptic feedback if haptic is being enabled (not when disabled)
+            if hapticEnabled {
+                let generator = UINotificationFeedbackGenerator()
+                generator.notificationOccurred(.success)
+            }
         }
     }
 }
 
 // MARK: - Supporting Components
-
 struct FeedbackTypeCard: View {
     let icon: String
     let title: String
