@@ -30,6 +30,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		92D488FD2D7AB4E000A0FE63 /* Exceptions for "Countify" folder in "Countify" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 92A0DE892D62F1A900329669 /* Countify */;
+		};
 		92E0E1432D6A5A6B0041B0C0 /* Exceptions for "CountifyTests" folder in "CountifyTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -49,6 +56,9 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		92A0DE8C2D62F1A900329669 /* Countify */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				92D488FD2D7AB4E000A0FE63 /* Exceptions for "Countify" folder in "Countify" target */,
+			);
 			path = Countify;
 			sourceTree = "<group>";
 		};
@@ -418,6 +428,7 @@
 				DEVELOPMENT_TEAM = QB2T369883;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Countify/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -447,6 +458,7 @@
 				DEVELOPMENT_TEAM = QB2T369883;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Countify/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
