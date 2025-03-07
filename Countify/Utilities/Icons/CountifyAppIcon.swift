@@ -13,8 +13,9 @@ struct CountifyAppIconUI: View {
     var decrementColor: Color = .red
     
     var body: some View {
-        HStack {
+        HStack(spacing: 0) {
             Spacer()
+            
             // Decrement button visual (non-functional)
             ZStack {
                 Circle()
@@ -24,7 +25,7 @@ struct CountifyAppIconUI: View {
                         Circle()
                             .strokeBorder(
                                 decrementColor.opacity(0.3),
-                                lineWidth: 1
+                                lineWidth: max(1, size * 0.0125)
                             )
                     )
                 
@@ -32,7 +33,7 @@ struct CountifyAppIconUI: View {
                     .font(.system(size: size * 0.625, weight: .medium))
                     .foregroundColor(decrementColor)
             }
-            .offset(x: 20, y: 0)
+            .offset(x: size * 0.1, y: 0)
             
             // Increment button visual (non-functional)
             ZStack {
@@ -43,7 +44,7 @@ struct CountifyAppIconUI: View {
                         Circle()
                             .strokeBorder(
                                 incrementColor.opacity(0.3),
-                                lineWidth: 1
+                                lineWidth: max(1, size * 0.0125)
                             )
                     )
                 
@@ -51,34 +52,21 @@ struct CountifyAppIconUI: View {
                     .font(.system(size: size * 0.625, weight: .medium))
                     .foregroundColor(incrementColor)
             }
-            .offset(x: -20, y: 0)
+            .offset(x: -size * 0.1, y: 0)
+            
             Spacer()
         }
     }
 }
+
+
 #Preview {
     VStack {
-        // Standard size
         CountifyAppIconUI()
-            .padding()
-            .background(Color.gray.opacity(0.1))
-            .cornerRadius(20)
-        
-        // Small icon size
-        CountifyAppIconUI(size: 40)
-            .padding()
-            .background(Color.gray.opacity(0.1))
-            .cornerRadius(20)
-        
-        // Large icon size with custom colors
-        CountifyAppIconUI(
-            size: 100,
-            incrementColor: .blue,
-            decrementColor: .orange
-        )
-        .padding()
-        .background(Color.gray.opacity(0.1))
-        .cornerRadius(20)
+        CountifyAppIconUI(size: 80)
+        CountifyAppIconUI(size: 160)
+        CountifyAppIconUI(size: 240)
+        CountifyAppIconUI(size: 300)
     }
     .padding()
 }

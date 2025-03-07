@@ -13,12 +13,22 @@ struct LaunchScreen: View {
             Color.black
                 .ignoresSafeArea()
             
-            VStack(spacing: 80) {
-                CountifyAppIconUI(size: 210)
-                
-                Text("Countify")
-                    .font(.system(size: 48, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+            GeometryReader { geometry in
+                VStack(spacing: geometry.size.height * 0.1) {
+                    // Icon size relative to screen width
+                    let iconSize = min(geometry.size.width * 0.5, 280)
+                    
+                    Spacer()
+                    
+                    CountifyAppIconUI(size: iconSize)
+                    
+                    Text("Countify")
+                        .font(.system(size: min(48, geometry.size.width * 0.12), weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                    
+                    Spacer()
+                }
+                .frame(width: geometry.size.width)
             }
         }
     }

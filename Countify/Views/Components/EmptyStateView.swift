@@ -11,97 +11,102 @@ struct EmptyStateView: View {
     let action: () -> Void
     
     var body: some View {
-        VStack(alignment: .center, spacing: 20) {
-            ScrollView {
-                VStack(spacing: 24) {
-                    CountifyAppIconUI(size: 180)
-                        .padding(.top, 20)
-                    
-                    VStack(spacing: 4) {
-                        Text("Welcome to Countify")
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundStyle(.primary)
-                        Text("Your Personal Counter Companion")
-                            .font(.system(size: 17, weight: .medium))
-                            .foregroundStyle(.secondary)
-                    }
-                    .padding(.bottom, 16)
-                    
-                    // Top two feature cards
-                    LazyVGrid(columns: [
-                        GridItem(.flexible(), spacing: 16),
-                        GridItem(.flexible(), spacing: 16)
-                    ], spacing: 16) {
-                        FeatureCard(
-                            icon: "rectangle.stack",
-                            title: "Multiple Sessions",
-                            description: "Create and manage multiple counting sessions"
-                        )
-                        
-                        FeatureCard(
-                            icon: "gear",
-                            title: "Customizable",
-                            description: "Configure each counter with your preferred settings"
-                        )
-                    }
-                    .padding(.horizontal)
-                    
+        GeometryReader { geometry in
+            VStack(alignment: .center, spacing: 20) {
+                ScrollView {
                     VStack(spacing: 24) {
-                        // Customizable Experiences - Multiple cards
-                        WideFeatureCard(
-                            icon: "arrow.up.arrow.down",
-                            title: "Custom Step Sizes",
-                            description: "Increment or decrement by any value - perfect for counting by 2s, 5s, or any number you choose"
-                        )
+                        // Icon size responsive to screen width
+                        let iconSize = min(geometry.size.width * 0.45, 200)
                         
-                        WideFeatureCard(
-                            icon: "ruler",
-                            title: "Set Counting Limits",
-                            description: "Define upper and lower bounds for your counters to prevent going beyond desired ranges"
-                        )
+                        CountifyAppIconUI(size: iconSize)
+                            .padding(.top, 20)
                         
-                        WideFeatureCard(
-                            icon: "hand.tap",
-                            title: "Haptic Feedback",
-                            description: "Feel distinct vibration patterns for different actions - increment, decrement, and reset operations"
-                        )
+                        VStack(spacing: 4) {
+                            Text("Welcome to Countify")
+                                .font(.system(size: min(28, geometry.size.width * 0.07), weight: .bold))
+                                .foregroundStyle(.primary)
+                            Text("Your Personal Counter Companion")
+                                .font(.system(size: min(17, geometry.size.width * 0.045), weight: .medium))
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.bottom, 16)
                         
-                        WideFeatureCard(
-                            icon: "icloud",
-                            title: "Automatic Saving",
-                            description: "Never lose your counts - all sessions are automatically saved as you go"
-                        )
+                        // Top two feature cards
+                        LazyVGrid(columns: [
+                            GridItem(.flexible(), spacing: 16),
+                            GridItem(.flexible(), spacing: 16)
+                        ], spacing: 16) {
+                            FeatureCard(
+                                icon: "rectangle.stack",
+                                title: "Multiple Sessions",
+                                description: "Create and manage multiple counting sessions"
+                            )
+                            
+                            FeatureCard(
+                                icon: "gear",
+                                title: "Customizable",
+                                description: "Configure each counter with your preferred settings"
+                            )
+                        }
+                        .padding(.horizontal)
+                        
+                        VStack(spacing: 24) {
+                            // Customizable Experiences - Multiple cards
+                            WideFeatureCard(
+                                icon: "arrow.up.arrow.down",
+                                title: "Custom Step Sizes",
+                                description: "Increment or decrement by any value - perfect for counting by 2s, 5s, or any number you choose"
+                            )
+                            
+                            WideFeatureCard(
+                                icon: "ruler",
+                                title: "Set Counting Limits",
+                                description: "Define upper and lower bounds for your counters to prevent going beyond desired ranges"
+                            )
+                            
+                            WideFeatureCard(
+                                icon: "hand.tap",
+                                title: "Haptic Feedback",
+                                description: "Feel distinct vibration patterns for different actions - increment, decrement, and reset operations"
+                            )
+                            
+                            WideFeatureCard(
+                                icon: "icloud",
+                                title: "Automatic Saving",
+                                description: "Never lose your counts - all sessions are automatically saved as you go"
+                            )
+                        }
+                        .padding(.horizontal)
+                        
+                        Spacer(minLength: 80) // Space for the button
                     }
-                    .padding(.horizontal)
-                    
-                    Spacer(minLength: 80) // Space for the button
                 }
-            }
-            
-            // Fixed Button at bottom
-            VStack {
-                Button(action: action) {
-                    HStack(spacing: 12) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 20, weight: .semibold))
-                        Text("Create Your First Counter")
-                            .font(.system(size: 17, weight: .semibold))
+                
+                // Fixed Button at bottom
+                VStack {
+                    Button(action: action) {
+                        HStack(spacing: 12) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 20, weight: .semibold))
+                            Text("Create Your First Counter")
+                                .font(.system(size: 17, weight: .semibold))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(.blue, in: RoundedRectangle(cornerRadius: 16) )
+                        .contentShape(RoundedRectangle(cornerRadius: 16))
+                        .foregroundStyle(.white)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(.blue, in: RoundedRectangle(cornerRadius: 16) )
-                    .contentShape(RoundedRectangle(cornerRadius: 16))
-                    .foregroundStyle(.white)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 16)
                 }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 16)
+                .background(
+                    Rectangle()
+                        .fill(.background)
+                        .ignoresSafeArea()
+                        .frame(height: 100)
+                )
             }
-            .background(
-                Rectangle()
-                    .fill(.background)
-                    .ignoresSafeArea()
-                    .frame(height: 100)
-            )
         }
     }
 }
