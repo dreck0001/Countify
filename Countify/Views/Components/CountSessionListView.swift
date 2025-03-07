@@ -145,10 +145,15 @@ struct CountSessionListView: View {
             } message: {
                 Text("Enter a new name for this counter")
             }
+            
+            // Add a placeholder view for iPad
+            Text("Select a counter to get started")
+                .font(.title2)
+                .foregroundColor(.secondary)
         }
+        .navigationViewStyle(StackNavigationViewStyle()) // This forces stack style on all devices
     }
 }
-
 struct LongPressableCard<Destination: View>: View {
     let session: CountSession
     let destination: Destination

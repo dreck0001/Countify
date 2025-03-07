@@ -11,17 +11,21 @@ struct CounterDisplayView: View {
     let count: Int
     let isIncrementing: Bool
     
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    
     var body: some View {
         Text("\(count)")
             .contentTransition(.numericText(countsDown: isIncrementing))
             .animation(.spring(response: 0.3, dampingFraction: 0.7), value: count)
             .minimumScaleFactor(0.3)
             .lineLimit(1)
-            .font(.system(size: 200, weight: .bold))
-            .frame(height: UIScreen.main.bounds.height / 3)
-            .frame(width: UIScreen.main.bounds.width)
+            // Adjust font size based on device size class
+            .font(.system(size: horizontalSizeClass == .regular ? 250 : 200, weight: .bold))
+            .frame(height: UIScreen.main.bounds.height / (horizontalSizeClass == .regular ? 2.5 : 3))
+            .frame(maxWidth: .infinity)
     }
 }
+
 
 #Preview {
     ScrollView {
