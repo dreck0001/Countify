@@ -11,6 +11,11 @@ import SwiftUI
 struct CountifyApp: App {
     @State private var isShowingLaunchScreen = true
     
+    init() {
+        // Register an app session when the app is launched
+        ReviewManager.shared.registerAppSession()
+    }
+    
     var body: some Scene {
         WindowGroup {
             ZStack {

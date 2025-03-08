@@ -176,9 +176,13 @@ struct CounterActionSheet: View {
             generator.impactOccurred(intensity: 0.8)
         }
         
+        // If the user is favoriting (not unfavoriting), consider it a positive interaction
+        if !session.favorite {
+            ReviewManager.shared.registerSuccessfulInteraction()
+        }
+        
         dismiss()
     }
-    
     // Helper methods with improved haptic feedback
     private func dismiss() {
         dismissWithAnimation()

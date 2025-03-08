@@ -144,6 +144,10 @@ struct NewSessionView: View {
             let generator = UINotificationFeedbackGenerator()
             generator.notificationOccurred(.success)
         }
+        
+        // Register successful interaction for potential review request
+        // Creating a new counter is a positive interaction
+        ReviewManager.shared.registerSuccessfulInteraction()
     }
 }
 

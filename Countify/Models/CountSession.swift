@@ -86,12 +86,34 @@ extension CountSession {
     
     // Safe increment that respects limits
     mutating func incrementWithinLimits() -> Bool {
+        // Store the previous count to check for milestone achievements
+        let previousCount = count
+        
         if canIncrement {
             count += stepSize
+            
+            // Check for milestone achievements (multiples of 100)
+            if previousCount < 100 && count >= 100 ||
+               previousCount < 500 && count >= 500 ||
+               previousCount < 1000 && count >= 1000 {
+                // Let ReviewManager know about this positive interaction
+                DispatchQueue.main.async {
+                    ReviewManager.shared.registerSuccessfulInteraction()
+                }
+            }
+            
             return true
         } else if let upperLimit = upperLimit, count < upperLimit {
             // If we can't increment by full step size but can get closer to limit
             count = upperLimit
+            
+            // Reaching the upper limit is also a milestone
+            if previousCount < upperLimit {
+                DispatchQueue.main.async {
+                    ReviewManager.shared.registerSuccessfulInteraction()
+                }
+            }
+            
             return true
         }
         return false
