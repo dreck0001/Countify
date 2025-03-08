@@ -418,7 +418,3 @@ struct CompactActionMenuItem: View {
         }
     }
 }
-
-//#Preview {
-//    CounterActionSheet()
-//}

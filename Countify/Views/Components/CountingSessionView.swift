@@ -33,7 +33,6 @@ struct CountingSessionView: View {
         VStack(spacing: 0) {
             // Counter Display taking up top third
             CounterDisplayView(count: session.count, isIncrementing: isIncrementing)
-//                .background(Color.gray.opacity(0.5))
             Divider()
             // Feature Tags Row - larger and tappable
             HStack(spacing: 24) {
@@ -158,7 +157,6 @@ struct CountingSessionView: View {
         }
         .navigationTitle(session.name)
         .toolbarTitleDisplayMode(.inline)
-//        .background(Color(.systemBackground))
         .toolbarColorScheme(.dark, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {

@@ -78,6 +78,3 @@ struct IncrementButton: View {
         .accessibilityHint("Single tap feedback will occur when pressed")
     }
 }
-//#Preview {
-//    CounterButtons()
-//}
